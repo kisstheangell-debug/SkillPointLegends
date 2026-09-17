@@ -1,6 +1,5 @@
 -- ═══════════════════════════════════════════════════════════
---   +1 Skill Point Legends — Utility v27.22
---   (все патчи: SP tracking, perf, security)
+--   +1 Skill Point Legends — Utility v28.1 (RUS/ENG + mini fix)
 -- ═══════════════════════════════════════════════════════════
 
 local Players         = game:GetService("Players")
@@ -22,14 +21,9 @@ local KillCounter = 0
 -- ═══ HIDDEN PARENT ═══
 local function tryParent(p)
     if not p then return false end
-    local ok = pcall(function()
-        local t = Instance.new("Folder")
-        t.Parent = p
-        t:Destroy()
-    end)
+    local ok = pcall(function() local t = Instance.new("Folder"); t.Parent = p; t:Destroy() end)
     return ok
 end
-
 local function getHiddenParent()
     if gethui then
         local ok, hui = pcall(gethui)
@@ -47,6 +41,238 @@ for _, name in ipairs({"SkillPointUtility","SPU_Settings","SPU_Toasts","SPU_Dial
     if old then old:Destroy() end
 end
 
+-- ═══ LANGUAGE SYSTEM ═══
+local LANG = "RUS"
+local STR = {
+    RUS = {
+        tab_main="Основное", tab_zones="Зоны", tab_players="Игроки", tab_farm="Фарм",
+        tab_hitbox="Hitbox", tab_visual="Visual", tab_tracker="Tracker", tab_utils="Utils",
+        tab_stats="Статистика", tab_settings="Настройки",
+        header_settings="Настройки", lang_switch="ENG",
+        sec_server="Сервер", sec_jump="Прыжки и движение", sec_speed="Скорость", sec_flight="Полёт",
+        sec_radar="Радар", sec_ghost="Призрак",
+        btn_server_hop="Server Hop (сменить сервер)",
+        tog_inf_jump="Бесконечные прыжки", desc_inf_jump="Прыгай без остановки",
+        tog_speed="Speed Hack", desc_speed="Ускорение передвижения", lbl_speed_value="СКОРОСТЬ ХОДЬБЫ",
+        tog_fly="Fly (полёт)", desc_fly="W/A/S/D + Space / LeftCtrl — управление", lbl_fly_speed="СКОРОСТЬ ПОЛЁТА",
+        tog_radar="Радар (мини-карта)", desc_radar="Мобы, боссы и игроки вокруг тебя", lbl_radar_range="РАДИУС РАДАРА",
+        tog_radar_mobs="Мобы на радаре", tog_radar_bosses="Боссы на радаре", tog_radar_players="Игроки на радаре",
+        tog_noclip="Призрак (сквозь стены)", desc_noclip="Проходи сквозь стены и текстуры",
+        sec_tp="Быстрый телепорт", sec_my_points="Мои точки", btn_save_pos="Запомнить текущую позицию",
+        sec_bosses_top="Боссы — топ-оружие", sec_bosses="Боссы",
+        sec_players="Список игроков", lbl_no_other_players="Других игроков нет", lbl_pos_unavailable="📍 Позиция недоступна",
+        sec_autofarm="Автоматический фарм", tog_autofarm="Авто-фарм мобов", desc_autofarm="Телепорт к мобу + удар ЛКМ + возврат",
+        tog_return="Возврат на старт", lbl_hit_delay="ЗАДЕРЖКА УДАРА (0.1с – 3.0с)",
+        sec_mob_hitbox="Хитбокс мобов", tog_hitbox="Расширить хитбокс", desc_hitbox="Увеличивает зону попадания мобов",
+        lbl_hitbox_size="РАЗМЕР ХИТБОКСА", btn_restore_hitboxes="Восстановить хитбоксы",
+        sec_mob_esp="ESP мобов", tog_mob_esp="ESP мобов", desc_mob_esp="Подсветка мобов сквозь стены",
+        tog_mob_hp="HP мобов", tog_mob_dist="Дистанция мобов",
+        sec_player_esp="ESP игроков", tog_player_esp="ESP игроков", desc_player_esp="Подсветка игроков сквозь стены",
+        tog_player_hp="HP игроков", desc_player_hp="Показывать здоровье игрока в ESP",
+        tog_player_dist="Дистанция игроков", desc_player_dist="Показывать расстояние до игрока",
+        sec_esp_color="Цвет ESP", sec_lighting="Освещение и камера", tog_fullbright="Fullbright", desc_fullbright="Убирает тени",
+        tog_nofog="Убрать туман", tog_zoom="Отдаление камеры", lbl_zoom_value="ДАЛЬНОСТЬ КАМЕРЫ",
+        tog_tracker="Включить Mob Tracker", desc_tracker="Показывает всех мобов рядом", sec_stats_tracker="Статистика",
+        lbl_sort="СОРТ", sort_dist="Дист", sort_boss="💀 Боссы", sort_hp="HP", sort_name="Имя",
+        stat_mobs="МОБОВ", stat_hp="СУММА HP", stat_nearest="БЛИЖАЙШИЙ", lbl_no_mobs="Мобов рядом нет",
+        sec_clicker="Кликер", tog_clicker="Auto-Clicker", desc_clicker="Автоматические клики ЛКМ", lbl_cps="КЛИКОВ В СЕКУНДУ",
+        sec_friends="Друзья", tog_friend_notify="Уведомления о друзьях", desc_friend_notify="Сообщение в чат при входе/выходе друга",
+        sec_session="Сессия", stat_session_time="Время сессии", stat_kills="Убийств",
+        sec_currency="Валюта", stat_sp_hand="SP на руках", stat_sp_min="SP / мин",
+        stat_sp_session="Заработано за сессию", stat_sp_spent="Потрачено (всего)", stat_sp_earned="Заработано (всего)",
+        btn_set_start="📌 Зафиксировать старт", btn_reset_sp="🗑 Сбросить SP-статистику",
+        lbl_start_fixed="📌 Зафиксированный старт: %s", lbl_start_not_fixed="📌 Старт не зафиксирован",
+        sec_location="Локация", stat_zone="Текущая зона", stat_pos="Позиция X,Z",
+        sec_character="Персонаж", stat_hp="Здоровье", stat_speed="Скорость",
+        btn_reset_kills="Сбросить счётчик убийств",
+        sec_perf="Производительность", tog_fps="FPS Booster", desc_fps="Убирает частицы, тени и эффекты для +FPS",
+        tog_antiafk="Anti-AFK", desc_antiafk="Не выкидывает за простой",
+        sec_configs="Конфиги", btn_save_config="Сохранить конфиг", btn_load_config="Загрузить конфиг", btn_reset_all="Сбросить настройки",
+        sec_theme="Тема", sec_controls="Управление", lbl_hide="Скрыть / показать скрипт", lbl_hide_desc="Нажми кнопку и введи клавишу",
+        sec_friends_notif="Друзья (уведомления)", btn_add_friend="Добавить друга",
+        sec_social="Соцсети", discord_open="Открыть →", discord_join="Присоединяйся к нашей группе",
+        sec_about="Об о мне", about_text="Script сделал Hirago",
+        dlg_save_cfg="Сохранить конфиг", dlg_cfg_name="Мой конфиг", dlg_cfg_name_ph="Название...",
+        dlg_add_friend="Добавить друга", dlg_player_name="Ник игрока...",
+        dlg_enter="Введите...", dlg_cancel="Отмена", dlg_rename="Переименовать", dlg_new_name="Новое имя...",
+        dlg_no_configs="Нет сохранённых конфигов", dlg_load_cfg="Загрузить конфиг",
+        toast_script_loaded="Скрипт загружен", toast_script_hidden="Скрипт скрыт", toast_script_shown="Скрипт показан",
+        toast_script_off="Скрипт выключен",
+        toast_search_server="Поиск сервера...", toast_hop="Хоп: %d/%d игроков",
+        toast_no_servers="Нет доступных серверов", toast_parse_error="Ошибка парсинга серверов",
+        toast_http_unavail="HTTP недоступен", toast_wait_hop="Подожди перед следующим хопом",
+        toast_inf_jump_on="Бесконечные прыжки: ON", toast_inf_jump_off="Бесконечные прыжки: OFF",
+        toast_speed_on="Speed Hack: %s", toast_speed_off="Speed Hack выключен",
+        toast_fly_on="Fly: %s", toast_fly_off="Fly выключен",
+        toast_radar_on="Радар включён", toast_radar_off="Радар выключен",
+        toast_ghost_on="Призрак: ON", toast_ghost_off="Призрак: OFF",
+        toast_tp="Телепорт: %s", toast_saved="Сохранено: %s",
+        toast_autofarm_on="Auto-Farm запущен", toast_autofarm_off="Auto-Farm остановлен",
+        toast_return_on="Возврат: ON", toast_return_off="Возврат: OFF",
+        toast_hitbox_on="Hitbox: ON (%s)", toast_hitbox_off="Hitbox: OFF", toast_hitbox_restored="Хитбоксы восстановлены",
+        toast_esp_mobs_on="ESP мобов: ON", toast_esp_mobs_off="ESP мобов: OFF",
+        toast_esp_plr_on="ESP игроков: ON", toast_esp_plr_off="ESP игроков: OFF",
+        toast_esp_color="Цвет ESP: %s",
+        toast_fullbright_on="Fullbright: ON", toast_fullbright_off="Fullbright: OFF",
+        toast_fog_off="Туман убран", toast_fog_on="Туман восстановлен",
+        toast_cam_on="Камера: %s", toast_cam_off="Камера: OFF",
+        toast_tracker_on="Mob Tracker: ON", toast_tracker_off="Mob Tracker: OFF",
+        toast_clicker_on="Auto-Clicker запущен", toast_clicker_off="Auto-Clicker остановлен",
+        toast_fps_on="FPS Booster: ON", toast_fps_off="FPS Booster: OFF",
+        toast_antiafk_on="Anti-AFK: ON", toast_antiafk_off="Anti-AFK: OFF",
+        toast_friend_notify_on="Уведомления о друзьях: ON", toast_friend_notify_off="Уведомления о друзьях: OFF",
+        toast_friend_joined="Друг зашёл: %s", toast_friend_left="Друг вышел: %s",
+        toast_friend_added="Добавлен: %s", toast_friend_removed="Удалён: %s",
+        toast_key_hide="Кнопка скрытия: %s", toast_tp_mob="Телепорт к %s", toast_to_mob="К %s",
+        toast_cfg_saved="Конфиг сохранён: %s", toast_cfg_save_err="Ошибка сохранения",
+        toast_cfg_deleted="Конфиг удалён: %s", toast_cfg_busy="Файл занят — попробуй позже",
+        toast_cfg_del_fail="Не удалось удалить", toast_cfg_loaded="Загружено: %s",
+        toast_reset_settings="Настройки сброшены", toast_reset_kills="Счётчик сброшен",
+        toast_sp_reset="SP-статистика сброшена", toast_sp_start="Старт зафиксирован: %s", toast_sp_err="Не удалось прочитать SP",
+        toast_theme="Тема: %s", toast_link_copied="Ссылка скопирована", toast_link_buffer="Ссылка в буфере — вставь в браузер",
+        toast_fs_unavail="FS недоступна",
+        toast_hide_hint="Скрипт скрыт  ·  %s для возврата",
+        chat_friend_joined="🟢 Друг зашёл: %s", chat_friend_left="🔴 Друг вышел: %s",
+        player_tp_to="Телепорт к %s", player_pos_unavail="Позиция %s недоступна",
+    },
+    ENG = {
+        tab_main="Main", tab_zones="Zones", tab_players="Players", tab_farm="Farm",
+        tab_hitbox="Hitbox", tab_visual="Visual", tab_tracker="Tracker", tab_utils="Utils",
+        tab_stats="Stats", tab_settings="Settings",
+        header_settings="Settings", lang_switch="RUS",
+        sec_server="Server", sec_jump="Jump & Movement", sec_speed="Speed", sec_flight="Flight",
+        sec_radar="Radar", sec_ghost="Ghost",
+        btn_server_hop="Server Hop (change server)",
+        tog_inf_jump="Infinite Jump", desc_inf_jump="Jump without stopping",
+        tog_speed="Speed Hack", desc_speed="Movement speed boost", lbl_speed_value="WALK SPEED",
+        tog_fly="Fly (flight)", desc_fly="W/A/S/D + Space / LeftCtrl — controls", lbl_fly_speed="FLY SPEED",
+        tog_radar="Radar (minimap)", desc_radar="Mobs, bosses and players around you", lbl_radar_range="RADAR RANGE",
+        tog_radar_mobs="Mobs on radar", tog_radar_bosses="Bosses on radar", tog_radar_players="Players on radar",
+        tog_noclip="Ghost (through walls)", desc_noclip="Walk through walls and textures",
+        sec_tp="Fast teleport", sec_my_points="My points", btn_save_pos="Save current position",
+        sec_bosses_top="Bosses — top weapon", sec_bosses="Bosses",
+        sec_players="Player list", lbl_no_other_players="No other players", lbl_pos_unavailable="📍 Position unavailable",
+        sec_autofarm="Auto farm", tog_autofarm="Auto-farm mobs", desc_autofarm="Teleport to mob + click + return",
+        tog_return="Return to start", lbl_hit_delay="HIT DELAY (0.1s – 3.0s)",
+        sec_mob_hitbox="Mob hitbox", tog_hitbox="Expand hitbox", desc_hitbox="Increases mob hit area",
+        lbl_hitbox_size="HITBOX SIZE", btn_restore_hitboxes="Restore hitboxes",
+        sec_mob_esp="Mob ESP", tog_mob_esp="Mob ESP", desc_mob_esp="Highlight mobs through walls",
+        tog_mob_hp="Mob HP", tog_mob_dist="Mob distance",
+        sec_player_esp="Player ESP", tog_player_esp="Player ESP", desc_player_esp="Highlight players through walls",
+        tog_player_hp="Player HP", desc_player_hp="Show player HP in ESP",
+        tog_player_dist="Player distance", desc_player_dist="Show distance to player",
+        sec_esp_color="ESP Color", sec_lighting="Lighting & Camera", tog_fullbright="Fullbright", desc_fullbright="Removes shadows",
+        tog_nofog="Remove fog", tog_zoom="Camera zoom out", lbl_zoom_value="CAMERA DISTANCE",
+        tog_tracker="Enable Mob Tracker", desc_tracker="Shows all nearby mobs", sec_stats_tracker="Statistics",
+        lbl_sort="SORT", sort_dist="Dist", sort_boss="💀 Bosses", sort_hp="HP", sort_name="Name",
+        stat_mobs="MOBS", stat_hp="TOTAL HP", stat_nearest="NEAREST", lbl_no_mobs="No mobs nearby",
+        sec_clicker="Clicker", tog_clicker="Auto-Clicker", desc_clicker="Automatic left clicks", lbl_cps="CLICKS PER SECOND",
+        sec_friends="Friends", tog_friend_notify="Friend notifications", desc_friend_notify="Chat message on friend join/leave",
+        sec_session="Session", stat_session_time="Session time", stat_kills="Kills",
+        sec_currency="Currency", stat_sp_hand="SP on hand", stat_sp_min="SP / min",
+        stat_sp_session="Earned this session", stat_sp_spent="Spent (total)", stat_sp_earned="Earned (total)",
+        btn_set_start="📌 Fix start", btn_reset_sp="🗑 Reset SP stats",
+        lbl_start_fixed="📌 Fixed start: %s", lbl_start_not_fixed="📌 Start not fixed",
+        sec_location="Location", stat_zone="Current zone", stat_pos="Position X,Z",
+        sec_character="Character", stat_hp="Health", stat_speed="Speed",
+        btn_reset_kills="Reset kill counter",
+        sec_perf="Performance", tog_fps="FPS Booster", desc_fps="Removes particles, shadows and effects for +FPS",
+        tog_antiafk="Anti-AFK", desc_antiafk="Prevents idle kick",
+        sec_configs="Configs", btn_save_config="Save config", btn_load_config="Load config", btn_reset_all="Reset settings",
+        sec_theme="Theme", sec_controls="Controls", lbl_hide="Hide / show script", lbl_hide_desc="Click the button and press a key",
+        sec_friends_notif="Friends (notifications)", btn_add_friend="Add friend",
+        sec_social="Social", discord_open="Open →", discord_join="Join our group",
+        sec_about="About me", about_text="Script made by Hirago",
+        dlg_save_cfg="Save config", dlg_cfg_name="My config", dlg_cfg_name_ph="Name...",
+        dlg_add_friend="Add friend", dlg_player_name="Player name...",
+        dlg_enter="Enter...", dlg_cancel="Cancel", dlg_rename="Rename", dlg_new_name="New name...",
+        dlg_no_configs="No saved configs", dlg_load_cfg="Load config",
+        toast_script_loaded="Script loaded", toast_script_hidden="Script hidden", toast_script_shown="Script shown",
+        toast_script_off="Script disabled",
+        toast_search_server="Searching for server...", toast_hop="Hop: %d/%d players",
+        toast_no_servers="No available servers", toast_parse_error="Server parse error",
+        toast_http_unavail="HTTP unavailable", toast_wait_hop="Wait before next hop",
+        toast_inf_jump_on="Infinite Jump: ON", toast_inf_jump_off="Infinite Jump: OFF",
+        toast_speed_on="Speed Hack: %s", toast_speed_off="Speed Hack disabled",
+        toast_fly_on="Fly: %s", toast_fly_off="Fly disabled",
+        toast_radar_on="Radar enabled", toast_radar_off="Radar disabled",
+        toast_ghost_on="Ghost: ON", toast_ghost_off="Ghost: OFF",
+        toast_tp="Teleport: %s", toast_saved="Saved: %s",
+        toast_autofarm_on="Auto-Farm started", toast_autofarm_off="Auto-Farm stopped",
+        toast_return_on="Return: ON", toast_return_off="Return: OFF",
+        toast_hitbox_on="Hitbox: ON (%s)", toast_hitbox_off="Hitbox: OFF", toast_hitbox_restored="Hitboxes restored",
+        toast_esp_mobs_on="Mob ESP: ON", toast_esp_mobs_off="Mob ESP: OFF",
+        toast_esp_plr_on="Player ESP: ON", toast_esp_plr_off="Player ESP: OFF",
+        toast_esp_color="ESP color: %s",
+        toast_fullbright_on="Fullbright: ON", toast_fullbright_off="Fullbright: OFF",
+        toast_fog_off="Fog removed", toast_fog_on="Fog restored",
+        toast_cam_on="Camera: %s", toast_cam_off="Camera: OFF",
+        toast_tracker_on="Mob Tracker: ON", toast_tracker_off="Mob Tracker: OFF",
+        toast_clicker_on="Auto-Clicker started", toast_clicker_off="Auto-Clicker stopped",
+        toast_fps_on="FPS Booster: ON", toast_fps_off="FPS Booster: OFF",
+        toast_antiafk_on="Anti-AFK: ON", toast_antiafk_off="Anti-AFK: OFF",
+        toast_friend_notify_on="Friend notifications: ON", toast_friend_notify_off="Friend notifications: OFF",
+        toast_friend_joined="Friend joined: %s", toast_friend_left="Friend left: %s",
+        toast_friend_added="Added: %s", toast_friend_removed="Removed: %s",
+        toast_key_hide="Hide key: %s", toast_tp_mob="Teleport to %s", toast_to_mob="To %s",
+        toast_cfg_saved="Config saved: %s", toast_cfg_save_err="Save error",
+        toast_cfg_deleted="Config deleted: %s", toast_cfg_busy="File busy — try later",
+        toast_cfg_del_fail="Failed to delete", toast_cfg_loaded="Loaded: %s",
+        toast_reset_settings="Settings reset", toast_reset_kills="Counter reset",
+        toast_sp_reset="SP stats reset", toast_sp_start="Start fixed: %s", toast_sp_err="Failed to read SP",
+        toast_theme="Theme: %s", toast_link_copied="Link copied", toast_link_buffer="Link in buffer — paste in browser",
+        toast_fs_unavail="FS not available",
+        toast_hide_hint="Script hidden  ·  %s to return",
+        chat_friend_joined="🟢 Friend joined: %s", chat_friend_left="🔴 Friend left: %s",
+        player_tp_to="Teleport to %s", player_pos_unavail="Position of %s unavailable",
+    },
+}
+local function T(key, ...)
+    local t = STR[LANG] or STR.RUS
+    local s = t[key] or (STR.RUS[key]) or key
+    if select("#", ...) > 0 then
+        local ok, res = pcall(string.format, s, ...)
+        if ok then return res end
+    end
+    return s
+end
+
+local textRegistry = {}
+local function regLang(inst, key)
+    inst:SetAttribute("_langKey", key)
+    inst.Text = T(key)
+    table.insert(textRegistry, inst)
+    return inst
+end
+local function regPlaceholder(inst, key)
+    inst:SetAttribute("_langPlaceholder", key)
+    inst.PlaceholderText = T(key)
+    table.insert(textRegistry, inst)
+    return inst
+end
+local function refreshAllLang()
+    for _, inst in ipairs(textRegistry) do
+        if inst and inst.Parent then
+            local k = inst:GetAttribute("_langKey")
+            local pk = inst:GetAttribute("_langPlaceholder")
+            local sk = inst:GetAttribute("_langSectionKey")
+            if sk then
+                local icon = inst:GetAttribute("_langSectionIcon") or ""
+                inst.Text = (icon ~= "" and (icon.."  ") or "")..string.upper(T(sk))
+            elseif pk and inst:IsA("TextBox") then
+                inst.PlaceholderText = T(pk)
+            elseif k and (inst:IsA("TextLabel") or inst:IsA("TextButton")) then
+                inst.Text = T(k)
+            end
+        end
+    end
+end
+local function setLang(newLang)
+    if LANG == newLang then return end
+    LANG = newLang
+    refreshAllLang()
+end
+
 local CONFIG_PREFIX = "SPU_config_"
 local FRIENDS_FILE = "SPU_friends.json"
 local FS_AVAILABLE = (writefile ~= nil) and (readfile ~= nil) and (isfile ~= nil) and (delfile ~= nil)
@@ -56,9 +282,7 @@ local _silentDepth = 0
 local function isSilent() return _silentDepth > 0 end
 local function enterSilent() _silentDepth = _silentDepth + 1 end
 local function exitSilentDelayed(delay)
-    task.delay(delay or 0.8, function()
-        _silentDepth = math.max(0, _silentDepth - 1)
-    end)
+    task.delay(delay or 0.8, function() _silentDepth = math.max(0, _silentDepth - 1) end)
 end
 
 local recentlyDeleted = {}
@@ -112,7 +336,7 @@ local DS = {
     Z = { header=62, sidebar=192, tabH=42, rowH=50, toastW=340, toastH=64 },
 }
 
-local T = {
+local T2 = {
     Radius = { window=DS.R.window, card=DS.R.card, button=DS.R.button, small=DS.R.small, pill=DS.R.round },
     Size   = { windowW=720, windowH=500, header=DS.Z.header, sidebar=DS.Z.sidebar, tabH=DS.Z.tabH, rowH=DS.Z.rowH },
 }
@@ -146,6 +370,7 @@ local Config = {
     AutoFarm=false, AutoFarmDelay=0.8, AutoFarmReturn=true,
     AutoClicker=false, AutoClickerCPS=10, NotifyFriends=true,
     ToggleKey = Enum.KeyCode.Delete,
+    Language = "RUS",
 }
 local savedFriends = {}
 local capturingKey = false
@@ -174,8 +399,8 @@ local ZONES = {
 }
 
 local BOSSES = {
-    {name="💀 Ashgor",   coords=Vector3.new(637,   2,  844), note="Ивентовый босс"},
-    {name="🐂 Минотавр", coords=Vector3.new(674, -94,  594), note="Boss топ-оружие"},
+    {name="💀 Ashgor",   coords=Vector3.new(637,   2,  844), note="Event"},
+    {name="🐂 Minotaur", coords=Vector3.new(674, -94,  594), note="Top weapon"},
 }
 
 local BOSSES_BY_ZONE = {
@@ -231,9 +456,7 @@ do
         return nil
     end
     local function findTextRole(color)
-        for role, c in pairs(TEXT_ROLES) do
-            if color == c then return role end
-        end
+        for role, c in pairs(TEXT_ROLES) do if color == c then return role end end
         return nil
     end
 
@@ -313,7 +536,6 @@ do
     end
 end
 
--- ★ Патч: поддержка KRNL
 local function protectGui(gui)
     if not gui then return end
     if syn and syn.protect_gui then pcall(syn.protect_gui, gui) return end
@@ -401,9 +623,7 @@ do
     end
 
     local function removeToast(toast, instant)
-        for i, t in ipairs(toastStack) do
-            if t == toast then table.remove(toastStack, i) break end
-        end
+        for i, t in ipairs(toastStack) do if t == toast then table.remove(toastStack, i) break end end
         if toast.Parent then
             if instant then toast:Destroy()
             else
@@ -486,7 +706,7 @@ do
     end
 end
 
--- ═══ STATUS ═══ (★ anchor в правом-нижнем углу)
+-- ═══ STATUS ═══
 local showStatus, hideStatus
 do
     local statusFrame = new("Frame", {
@@ -557,8 +777,8 @@ local screenGui = new("ScreenGui", {
 protectGui(screenGui)
 
 local main = new("Frame", {
-    Size=UDim2.new(0,T.Size.windowW,0,T.Size.windowH),
-    Position=UDim2.new(0.5,-T.Size.windowW/2,0.5,-T.Size.windowH/2),
+    Size=UDim2.new(0,T2.Size.windowW,0,T2.Size.windowH),
+    Position=UDim2.new(0.5,-T2.Size.windowW/2,0.5,-T2.Size.windowH/2),
     BackgroundColor3=C.bg, BorderSizePixel=0, Parent=screenGui,
     ClipsDescendants=true,
 })
@@ -566,7 +786,7 @@ corner(main, DS.R.window)
 local mainStroke = stroke(main, C.border, 1.2)
 
 local header = new("Frame", {
-    Size=UDim2.new(1,0,0,T.Size.header),
+    Size=UDim2.new(1,0,0,T2.Size.header),
     BackgroundColor3=C.bgAlt, BorderSizePixel=0, Parent=main
 })
 corner(header, DS.R.window)
@@ -589,7 +809,7 @@ local titleLbl = new("TextLabel", { Size=UDim2.new(0,220,0,18), Position=UDim2.n
     BackgroundTransparency=1, Text="Skill Point Legends", TextColor3=C.text,
     Font=DS.F.title, TextSize=15, TextXAlignment=Enum.TextXAlignment.Left, Parent=header })
 local subtitleLbl = new("TextLabel", { Size=UDim2.new(0,220,0,14), Position=UDim2.new(0,68,0,34),
-    BackgroundTransparency=1, Text="Utility v27.22", TextColor3=C.textMuted,
+    BackgroundTransparency=1, Text="Utility v28.1", TextColor3=C.textMuted,
     Font=DS.F.subtle, TextSize=10, TextXAlignment=Enum.TextXAlignment.Left, Parent=header })
 
 local miniBtn = new("TextButton", { Size=UDim2.new(0,30,0,30), Position=UDim2.new(1,-78,0.5,-15),
@@ -610,12 +830,44 @@ do
     end)
 end
 
+local langBtn = new("TextButton", {
+    Size=UDim2.new(0,54,0,26),
+    Position=UDim2.new(1,-142,0.5,-13),
+    BackgroundColor3=C.accent,
+    Text="RUS",
+    TextColor3=Color3.fromRGB(255,255,255),
+    Font=DS.F.bold, TextSize=12,
+    BorderSizePixel=0, AutoButtonColor=false,
+    Parent=header,
+})
+corner(langBtn, DS.R.chip)
+stroke(langBtn, C.accent2, 1, 0.5)
+local function updateLangBtn()
+    langBtn.Text = T("lang_switch")
+end
+updateLangBtn()
+langBtn.MouseEnter:Connect(function()
+    local cur = langBtn.BackgroundColor3
+    TweenService:Create(langBtn, TweenInfo.new(DS.A.fast), {
+        BackgroundColor3=Color3.new(math.min(1,cur.R+0.08),math.min(1,cur.G+0.08),math.min(1,cur.B+0.08))
+    }):Play()
+end)
+langBtn.MouseLeave:Connect(function()
+    TweenService:Create(langBtn, TweenInfo.new(DS.A.fast), { BackgroundColor3=C.accent }):Play()
+end)
+langBtn.MouseButton1Click:Connect(function()
+    LANG = (LANG == "RUS") and "ENG" or "RUS"
+    Config.Language = LANG
+    refreshAllLang()
+    updateLangBtn()
+end)
+
 local closeBtn = createCloseButton(header, 30, function() if shutdown then shutdown() end end)
 closeBtn.Position = UDim2.new(1,-42,0.5,-15)
 
 local serverInfoLbl = new("TextLabel", {
-    Size=UDim2.new(0,230,0,22),
-    Position=UDim2.new(1,-318,0.5,-11),
+    Size=UDim2.new(0,180,0,22),
+    Position=UDim2.new(1,-440,0.5,-11),
     BackgroundTransparency=1,
     Text="Ping --ms  ·  FPS --  ·  --/--",
     TextColor3=C.danger,
@@ -629,8 +881,8 @@ serverInfoLbl:SetAttribute("_customTextColor", C.danger)
 
 local minimized, savedSize, savedMainBg, savedMainTransparency = false, main.Size, main.BackgroundColor3, main.BackgroundTransparency
 
-local sidebar = new("Frame", { Size=UDim2.new(0,T.Size.sidebar,1,-(T.Size.header+28)),
-    Position=UDim2.new(0,14,0,T.Size.header+14),
+local sidebar = new("Frame", { Size=UDim2.new(0,T2.Size.sidebar,1,-(T2.Size.header+28)),
+    Position=UDim2.new(0,14,0,T2.Size.header+14),
     BackgroundColor3=C.bgAlt, BorderSizePixel=0, Parent=main })
 corner(sidebar, DS.R.card)
 stroke(sidebar, C.border, 1, 0.4)
@@ -658,13 +910,13 @@ stroke(settingsBtn, C.border, 1, 0.5)
 local settingsIcon = new("TextLabel", { Size=UDim2.new(0,24,1,0), Position=UDim2.new(0,14,0,0),
     BackgroundTransparency=1, Text="⚙", TextColor3=C.textDim, Font=DS.F.bold, TextSize=15,
     TextXAlignment=Enum.TextXAlignment.Center, Parent=settingsBtn })
-local settingsLabel = new("TextLabel", { Size=UDim2.new(1,-42,1,0), Position=UDim2.new(0,42,0,0),
-    BackgroundTransparency=1, Text="Настройки", TextColor3=C.textDim,
-    Font=DS.F.body, TextSize=12, TextXAlignment=Enum.TextXAlignment.Left, Parent=settingsBtn })
+local settingsLabel = regLang(new("TextLabel", { Size=UDim2.new(1,-42,1,0), Position=UDim2.new(0,42,0,0),
+    BackgroundTransparency=1, TextColor3=C.textDim,
+    Font=DS.F.body, TextSize=12, TextXAlignment=Enum.TextXAlignment.Left, Parent=settingsBtn }), "header_settings")
 
 local contentFrame = new("Frame", {
-    Size=UDim2.new(1,-(T.Size.sidebar+38),1,-(T.Size.header+28)),
-    Position=UDim2.new(0,T.Size.sidebar+28,0,T.Size.header+14),
+    Size=UDim2.new(1,-(T2.Size.sidebar+38),1,-(T2.Size.header+28)),
+    Position=UDim2.new(0,T2.Size.sidebar+28,0,T2.Size.header+14),
     BackgroundTransparency=1, Parent=main })
 
 do
@@ -673,17 +925,25 @@ do
         minimized = not minimized
         if minimized then
             savedSize, savedMainBg, savedMainTransparency = main.Size, main.BackgroundColor3, main.BackgroundTransparency
-            sidebar.Visible, contentFrame.Visible, titleLbl.Visible, subtitleLbl.Visible = false, false, false, false
+            sidebar.Visible = false
+            contentFrame.Visible = false
+            titleLbl.Visible = false
+            subtitleLbl.Visible = false
             serverInfoLbl.Visible = false
+            langBtn.Visible = false
             main.BackgroundColor3, main.BackgroundTransparency, mainStroke.Transparency = C.bgAlt, 0, 1
             TweenService:Create(main, TweenInfo.new(0.28, DS.A.ease, Enum.EasingDirection.Out), {
-                Size=UDim2.new(0,MINI_WIDTH,0,T.Size.header) }):Play()
+                Size=UDim2.new(0,MINI_WIDTH,0,T2.Size.header) }):Play()
         else
             main.BackgroundColor3, main.BackgroundTransparency, mainStroke.Transparency = savedMainBg, savedMainTransparency, 0
             TweenService:Create(main, TweenInfo.new(0.28, DS.A.ease, Enum.EasingDirection.Out), { Size=savedSize }):Play()
             task.delay(0.2, function()
-                sidebar.Visible, contentFrame.Visible, titleLbl.Visible, subtitleLbl.Visible = true, true, true, true
+                sidebar.Visible = true
+                contentFrame.Visible = true
+                titleLbl.Visible = true
+                subtitleLbl.Visible = true
                 serverInfoLbl.Visible = true
+                langBtn.Visible = true
             end)
         end
     end)
@@ -692,7 +952,7 @@ end
 do
     local dragging, dragStart, startPos
     local function isOverHeaderControl(pos)
-        for _, btn in ipairs({miniBtn, closeBtn}) do
+        for _, btn in ipairs({miniBtn, closeBtn, langBtn}) do
             if btn and btn.Parent then
                 local ap, asz = btn.AbsolutePosition, btn.AbsoluteSize
                 if pos.X>=ap.X and pos.X<=ap.X+asz.X and pos.Y>=ap.Y and pos.Y<=ap.Y+asz.Y then return true end
@@ -744,7 +1004,7 @@ local function switchTab(name)
             data.accentBar.Size = UDim2.new(0,3,0,0)
         end
     end
-    if name == "Настройки" then
+    if name == "tab_settings" then
         TweenService:Create(settingsIcon, TweenInfo.new(DS.A.normal), { TextColor3=C.accent }):Play()
         TweenService:Create(settingsLabel, TweenInfo.new(DS.A.normal), { TextColor3=C.text }):Play()
     else
@@ -753,9 +1013,9 @@ local function switchTab(name)
     end
 end
 
-local function createTab(icon, name, order)
+local function createTab(icon, nameKey, order)
     local btn = new("TextButton", {
-        Size=UDim2.new(1,0,0,T.Size.tabH), BackgroundColor3=C.bgAlt, BackgroundTransparency=1,
+        Size=UDim2.new(1,0,0,T2.Size.tabH), BackgroundColor3=C.bgAlt, BackgroundTransparency=1,
         Text="", BorderSizePixel=0, AutoButtonColor=false, LayoutOrder=order, Parent=sidebarTabs })
     corner(btn, DS.R.chip)
     local accentBar = new("Frame", { Size=UDim2.new(0,3,0,0), Position=UDim2.new(0,0,0.5,0),
@@ -765,10 +1025,10 @@ local function createTab(icon, name, order)
     local iconLbl = new("TextLabel", { Size=UDim2.new(0,24,1,0), Position=UDim2.new(0,14,0,0),
         BackgroundTransparency=1, Text=icon, TextColor3=C.textDim,
         Font=DS.F.bold, TextSize=14, TextXAlignment=Enum.TextXAlignment.Center, Parent=btn })
-    local nameLbl = new("TextLabel", { Size=UDim2.new(1,-46,1,0), Position=UDim2.new(0,44,0,0),
-        BackgroundTransparency=1, Text=name, TextColor3=C.textDim,
-        Font=DS.F.body, TextSize=12, TextXAlignment=Enum.TextXAlignment.Left, Parent=btn })
-    local isFixed = (name == "Tracker")
+    local nameLbl = regLang(new("TextLabel", { Size=UDim2.new(1,-46,1,0), Position=UDim2.new(0,44,0,0),
+        BackgroundTransparency=1, TextColor3=C.textDim,
+        Font=DS.F.body, TextSize=12, TextXAlignment=Enum.TextXAlignment.Left, Parent=btn }), nameKey)
+    local isFixed = (nameKey == "tab_tracker")
     local page = new("ScrollingFrame", {
         Size=UDim2.new(1,0,1,0), BackgroundTransparency=1, BorderSizePixel=0,
         ScrollBarThickness=isFixed and 0 or 5, ScrollBarImageColor3=C.accent,
@@ -781,52 +1041,52 @@ local function createTab(icon, name, order)
         new("UIPadding", { PaddingTop=UDim.new(0,6), PaddingBottom=UDim.new(0,16),
             PaddingRight=UDim.new(0,8), PaddingLeft=UDim.new(0,2), Parent=page })
     end
-    tabContents[name] = {button=btn, page=page, icon=iconLbl, label=nameLbl, accentBar=accentBar}
+    tabContents[nameKey] = {button=btn, page=page, icon=iconLbl, label=nameLbl, accentBar=accentBar}
     btn.MouseEnter:Connect(function()
-        if activeTab ~= name then
+        if activeTab ~= nameKey then
             TweenService:Create(btn, TweenInfo.new(DS.A.fast), { BackgroundTransparency=0.5, BackgroundColor3=C.hover }):Play()
             TweenService:Create(iconLbl, TweenInfo.new(DS.A.fast), { TextColor3=C.text }):Play()
             TweenService:Create(nameLbl, TweenInfo.new(DS.A.fast), { TextColor3=C.text }):Play()
         end
     end)
     btn.MouseLeave:Connect(function()
-        if activeTab ~= name then
+        if activeTab ~= nameKey then
             TweenService:Create(btn, TweenInfo.new(DS.A.fast), { BackgroundTransparency=1 }):Play()
             TweenService:Create(iconLbl, TweenInfo.new(DS.A.fast), { TextColor3=C.textDim }):Play()
             TweenService:Create(nameLbl, TweenInfo.new(DS.A.fast), { TextColor3=C.textDim }):Play()
         end
     end)
-    btn.MouseButton1Click:Connect(function() switchTab(name) end)
+    btn.MouseButton1Click:Connect(function() switchTab(nameKey) end)
     return page
 end
 
-local pageMain     = createTab("🏠", "Основное", 1)
-local pageZones    = createTab("🌀", "Зоны", 2)
-local pageTP       = createTab("👥", "Игроки", 3)
-local pageFarm     = createTab("⚔", "Фарм", 4)
-local pageHitbox   = createTab("👊", "Hitbox", 5)
-local pageVisual   = createTab("👁", "Visual", 6)
-local pageTracker  = createTab("📊", "Tracker", 7)
-local pageUtility  = createTab("🛠", "Utils", 8)
-local pageStats    = createTab("📈", "Статистика", 9)
-local pageSettings = createTab("⚙", "Настройки", 99)
-tabContents["Настройки"].button.Visible = false
+local pageMain     = createTab("🏠", "tab_main", 1)
+local pageZones    = createTab("🌀", "tab_zones", 2)
+local pageTP       = createTab("👥", "tab_players", 3)
+local pageFarm     = createTab("⚔", "tab_farm", 4)
+local pageHitbox   = createTab("👊", "tab_hitbox", 5)
+local pageVisual   = createTab("👁", "tab_visual", 6)
+local pageTracker  = createTab("📊", "tab_tracker", 7)
+local pageUtility  = createTab("🛠", "tab_utils", 8)
+local pageStats    = createTab("📈", "tab_stats", 9)
+local pageSettings = createTab("⚙", "tab_settings", 99)
+tabContents["tab_settings"].button.Visible = false
 
-activeTab = "Основное"
-tabContents["Основное"].page.Visible = true
-tabContents["Основное"].button.BackgroundTransparency = 0
-tabContents["Основное"].button.BackgroundColor3 = C.card
-tabContents["Основное"].button:SetAttribute("_bgRole", "card")
-tabContents["Основное"].button:SetAttribute("_baseColor", C.card)
-tabContents["Основное"].icon.TextColor3 = C.accent
-tabContents["Основное"].label.TextColor3 = C.text
-tabContents["Основное"].accentBar.Visible = true
-tabContents["Основное"].accentBar.Size = UDim2.new(0,3,0.55,0)
+activeTab = "tab_main"
+tabContents["tab_main"].page.Visible = true
+tabContents["tab_main"].button.BackgroundTransparency = 0
+tabContents["tab_main"].button.BackgroundColor3 = C.card
+tabContents["tab_main"].button:SetAttribute("_bgRole", "card")
+tabContents["tab_main"].button:SetAttribute("_baseColor", C.card)
+tabContents["tab_main"].icon.TextColor3 = C.accent
+tabContents["tab_main"].label.TextColor3 = C.text
+tabContents["tab_main"].accentBar.Visible = true
+tabContents["tab_main"].accentBar.Size = UDim2.new(0,3,0.55,0)
 
-settingsBtn.MouseButton1Click:Connect(function() switchTab("Настройки") end)
+settingsBtn.MouseButton1Click:Connect(function() switchTab("tab_settings") end)
 settingsBtn.MouseEnter:Connect(function()
     TweenService:Create(settingsBtn, TweenInfo.new(DS.A.fast), { BackgroundColor3=C.hover }):Play()
-    if activeTab ~= "Настройки" then
+    if activeTab ~= "tab_settings" then
         TweenService:Create(settingsIcon, TweenInfo.new(DS.A.fast), { TextColor3=C.accent }):Play()
         TweenService:Create(settingsLabel, TweenInfo.new(DS.A.fast), { TextColor3=C.text }):Play()
     end
@@ -834,7 +1094,7 @@ end)
 settingsBtn.MouseLeave:Connect(function()
     local restore = settingsBtn:GetAttribute("_baseColor") or C.card
     TweenService:Create(settingsBtn, TweenInfo.new(DS.A.fast), { BackgroundColor3=restore }):Play()
-    if activeTab ~= "Настройки" then
+    if activeTab ~= "tab_settings" then
         TweenService:Create(settingsIcon, TweenInfo.new(DS.A.fast), { TextColor3=C.textDim }):Play()
         TweenService:Create(settingsLabel, TweenInfo.new(DS.A.fast), { TextColor3=C.textDim }):Play()
     end
@@ -844,31 +1104,34 @@ end)
 local toggleRegistry, allToggles, allSliders = {}, {}, {}
 local makeSection, createToggle, createSlider, createButton
 do
-    makeSection = function(parent, text, icon)
+    makeSection = function(parent, textKey, icon)
         local row = new("Frame", { Size=UDim2.new(1,-8,0,26), BackgroundTransparency=1, Parent=parent })
         local accent = new("Frame", { Size=UDim2.new(0,3,0,12), Position=UDim2.new(0,0,0.5,-6),
             BackgroundColor3=C.accent, BackgroundTransparency=0.3, BorderSizePixel=0, Parent=row })
         corner(accent, DS.R.round)
-        new("TextLabel", { Size=UDim2.new(1,-10,1,0), Position=UDim2.new(0,10,0,0), BackgroundTransparency=1,
-            Text=(icon and (icon.."  ") or "")..string.upper(text),
+        local lbl = new("TextLabel", { Size=UDim2.new(1,-10,1,0), Position=UDim2.new(0,10,0,0), BackgroundTransparency=1,
+            Text=(icon and (icon.."  ") or "")..string.upper(T(textKey)),
             TextColor3=C.textMuted, Font=DS.F.bold, TextSize=10,
             TextXAlignment=Enum.TextXAlignment.Left, Parent=row })
+        lbl:SetAttribute("_langSectionKey", textKey)
+        lbl:SetAttribute("_langSectionIcon", icon or "")
+        table.insert(textRegistry, lbl)
         return row
     end
 
-    createToggle = function(parent, label, default, callback, id, desc)
-        local rowH = desc and 60 or T.Size.rowH
+    createToggle = function(parent, labelKey, default, callback, id, descKey)
+        local rowH = descKey and 60 or T2.Size.rowH
         local frame = new("Frame", { Size=UDim2.new(1,-8,0,rowH), BackgroundColor3=C.card, BorderSizePixel=0, Parent=parent })
         corner(frame, DS.R.card)
         local frameStroke = stroke(frame, C.border, 1, 0.5)
-        new("TextLabel", { Size=UDim2.new(1,-110,0,18),
-            Position=UDim2.new(0,16,0,desc and 12 or (rowH/2-9)),
-            BackgroundTransparency=1, Text=label, TextColor3=C.text,
-            Font=DS.F.body, TextSize=13, TextXAlignment=Enum.TextXAlignment.Left, Parent=frame })
-        if desc then
-            new("TextLabel", { Size=UDim2.new(1,-110,0,14), Position=UDim2.new(0,16,0,30),
-                BackgroundTransparency=1, Text=desc, TextColor3=C.textMuted,
-                Font=DS.F.subtle, TextSize=10, TextXAlignment=Enum.TextXAlignment.Left, Parent=frame })
+        regLang(new("TextLabel", { Size=UDim2.new(1,-110,0,18),
+            Position=UDim2.new(0,16,0,descKey and 12 or (rowH/2-9)),
+            BackgroundTransparency=1, TextColor3=C.text,
+            Font=DS.F.body, TextSize=13, TextXAlignment=Enum.TextXAlignment.Left, Parent=frame }), labelKey)
+        if descKey then
+            regLang(new("TextLabel", { Size=UDim2.new(1,-110,0,14), Position=UDim2.new(0,16,0,30),
+                BackgroundTransparency=1, TextColor3=C.textMuted,
+                Font=DS.F.subtle, TextSize=10, TextXAlignment=Enum.TextXAlignment.Left, Parent=frame }), descKey)
         end
         local switchBg = new("Frame", { Size=UDim2.new(0,46,0,24), Position=UDim2.new(1,-62,0.5,-12),
             BackgroundColor3=default and C.success or C.borderLight,
@@ -913,13 +1176,13 @@ do
         return frame
     end
 
-    createSlider = function(parent, label, min, max, default, color, onChange, id)
+    createSlider = function(parent, labelKey, min, max, default, color, onChange, id)
         local card = new("Frame", { Size=UDim2.new(1,-8,0,74), BackgroundColor3=C.card, BorderSizePixel=0, Parent=parent })
         corner(card, DS.R.card)
         local cardStroke = stroke(card, C.border, 1, 0.5)
-        new("TextLabel", { Size=UDim2.new(1,-100,0,16), Position=UDim2.new(0,16,0,12),
-            BackgroundTransparency=1, Text=label, TextColor3=C.textDim,
-            Font=DS.F.bold, TextSize=10, TextXAlignment=Enum.TextXAlignment.Left, Parent=card })
+        regLang(new("TextLabel", { Size=UDim2.new(1,-100,0,16), Position=UDim2.new(0,16,0,12),
+            BackgroundTransparency=1, TextColor3=C.textDim,
+            Font=DS.F.bold, TextSize=10, TextXAlignment=Enum.TextXAlignment.Left, Parent=card }), labelKey)
         local valueBadge = new("Frame", { Size=UDim2.new(0,64,0,22), Position=UDim2.new(1,-80,0,10),
             BackgroundColor3=color or C.accent, BackgroundTransparency=0.85, BorderSizePixel=0, Parent=card })
         corner(valueBadge, DS.R.round)
@@ -975,7 +1238,7 @@ do
         return card
     end
 
-    createButton = function(parent, text, color, callback, icon)
+    createButton = function(parent, textKey, color, callback, icon)
         local baseColor = color or C.accent
         local btn = new("TextButton", {
             Size=UDim2.new(1,-8,0,44), BackgroundColor3=baseColor, Text="",
@@ -991,9 +1254,11 @@ do
             new("TextLabel", { Size=UDim2.new(0,16,1,0), BackgroundTransparency=1, Text=icon,
                 TextColor3=C.text, Font=DS.F.bold, TextSize=14, LayoutOrder=1, Parent=content })
         end
-        new("TextLabel", { Size=UDim2.new(0,0,1,0), AutomaticSize=Enum.AutomaticSize.X,
-            BackgroundTransparency=1, Text=text, TextColor3=C.text,
+        local textLbl = new("TextLabel", { Size=UDim2.new(0,0,1,0), AutomaticSize=Enum.AutomaticSize.X,
+            BackgroundTransparency=1, Text=T(textKey), TextColor3=C.text,
             Font=DS.F.bold, TextSize=12, LayoutOrder=2, Parent=content })
+        textLbl:SetAttribute("_langKey", textKey)
+        table.insert(textRegistry, textLbl)
         btn.MouseEnter:Connect(function()
             local cur = btn.BackgroundColor3
             TweenService:Create(btn, TweenInfo.new(DS.A.fast), {
@@ -1014,15 +1279,11 @@ end
 local parseNumber, formatNumber
 do
     local NUMBER_SUFFIXES = {
-        K=1e3, M=1e6, B=1e9, T=1e12,
-        QD=1e15, QA=1e15,
-        QN=1e18, QI=1e18,
-        SX=1e21, SP=1e24, OC=1e27, NO=1e30, DC=1e33,
-        Q=1e15, QQ=1e18,
-        UD=1e36, DD=1e39, TD=1e42, QAD=1e45, QID=1e48,
-        SXD=1e51, SPD=1e54, OCD=1e57, NOD=1e60, VG=1e63,
+        K=1e3, M=1e6, B=1e9, T=1e12, QD=1e15, QA=1e15, QN=1e18, QI=1e18,
+        SX=1e21, SP=1e24, OC=1e27, NO=1e30, DC=1e33, Q=1e15, QQ=1e18,
+        UD=1e36, DD=1e39, TD=1e42, QAD=1e45, QID=1e48, SXD=1e51, SPD=1e54,
+        OCD=1e57, NOD=1e60, VG=1e63,
     }
-
     parseNumber = function(str)
         if not str then return nil end
         if type(str) == "number" then return str end
@@ -1041,7 +1302,6 @@ do
         end
         return n
     end
-
     formatNumber = function(num)
         if not num then return "?" end
         if num < 1e3 then return tostring(math.floor(num)) end
@@ -1049,17 +1309,13 @@ do
             {1e63,"Vg"},{1e60,"NoD"},{1e57,"OcD"},{1e54,"SpD"},{1e51,"SxD"},
             {1e48,"QiD"},{1e45,"QaD"},{1e42,"TD"},{1e39,"DD"},{1e36,"UD"},
             {1e33,"Dc"},{1e30,"No"},{1e27,"Oc"},{1e24,"Sp"},{1e21,"Sx"},
-            {1e18,"Qn"},{1e15,"Qd"},
-            {1e12,"T"},{1e9,"B"},{1e6,"M"},{1e3,"K"},
+            {1e18,"Qn"},{1e15,"Qd"},{1e12,"T"},{1e9,"B"},{1e6,"M"},{1e3,"K"},
         }
         for _, u in ipairs(units) do
             if num >= u[1] then
                 local v = num / u[1]
-                if v == math.floor(v) then
-                    return string.format("%d%s", v, u[2])
-                else
-                    return string.format("%.1f%s", v, u[2])
-                end
+                if v == math.floor(v) then return string.format("%d%s", v, u[2])
+                else return string.format("%.1f%s", v, u[2]) end
             end
         end
         return tostring(math.floor(num))
@@ -1084,7 +1340,6 @@ do
         if string.match(txt, "^[%d%.]+$") then return true end
         return false
     end
-
     getMobDisplayName = function(mob)
         for _, attrName in ipairs({"DisplayName","displayName","MobName","mobName","NpcName","npcName","MonsterName","monsterName","Name","name"}) do
             local v = mob:GetAttribute(attrName)
@@ -1123,7 +1378,6 @@ do
         end
         return mob.Name
     end
-
     getMobHP = function(mob)
         for _, attrName in ipairs({"Health","health","HP","hp","CurrentHealth","currenthealth"}) do
             local v = mob:GetAttribute(attrName)
@@ -1156,7 +1410,6 @@ do
         end
         return nil, nil, nil, nil
     end
-
     local SKULL_1 = "\240\159\146\128"
     local SKULL_2 = "\226\152\160"
     local CROWN   = "\240\159\145\145"
@@ -1166,7 +1419,6 @@ do
         return string.find(str, SKULL_1, 1, true) or string.find(str, SKULL_2, 1, true)
             or string.find(str, CROWN, 1, true) or string.find(str, SKULL_3, 1, true)
     end
-
     local STRUCTURE_KEYWORDS = {
         "gate","door","portal","sign","chest","spawner","barrier","wall","tower","shrine","altar","statue",
         "beacon","totem","lamp","torch","platform","bridge","fence","button","lever","pressure","pad",
@@ -1180,15 +1432,10 @@ do
         for _, kw in ipairs(STRUCTURE_KEYWORDS) do if string.find(lower, kw, 1, true) then return true end end
         return false
     end
-
     local BOSS_NAME_WHITELIST = {
-        "ashgor", "минотавр", "minotaur",
-        "chief", "dino", "arachinex",
-        "grimroot", "leonidas",
-        "lightning god",
-        "sand golem", "hydra worm", "dragon",
-        "nevermore", "simba", "anubis",
-        "eyegor", "bloodrootwitch", "queen of serpents",
+        "ashgor","минотавр","minotaur","chief","dino","arachinex","grimroot","leonidas",
+        "lightning god","sand golem","hydra worm","dragon","nevermore","simba","anubis",
+        "eyegor","bloodrootwitch","queen of serpents",
     }
     local function matchBossName(s)
         if not s then return false end
@@ -1199,19 +1446,13 @@ do
         end
         return false
     end
-
-    -- ★ Патч: throttle + depth limit
     local bossBarCache = { name = nil, hp = nil, maxHp = nil, time = 0, hasCache = false }
     local function sniffBossBar()
         local now = tick()
         local ttl = bossBarCache.hasCache and 0.75 or 3.0
-        if now - bossBarCache.time < ttl then
-            return bossBarCache.name, bossBarCache.hp, bossBarCache.maxHp
-        end
+        if now - bossBarCache.time < ttl then return bossBarCache.name, bossBarCache.hp, bossBarCache.maxHp end
         bossBarCache.time = now
-        bossBarCache.name = nil
-        bossBarCache.hp = nil
-        bossBarCache.maxHp = nil
+        bossBarCache.name = nil bossBarCache.hp = nil bossBarCache.maxHp = nil
         local root = LocalPlayer:FindFirstChild("PlayerGui")
         if not root then return nil, nil, nil end
         local hpPattern = "^([%d%.]+%a*)%s*/%s*([%d%.]+%a*)$"
@@ -1247,9 +1488,7 @@ do
                 for _, sib in ipairs(parent:GetDescendants()) do
                     if sib:IsA("TextLabel") and sib ~= bestHpLbl then
                         local st = (sib.Text or ""):gsub("^%s+",""):gsub("%s+$","")
-                        if #st >= 2 and #st <= 40
-                        and not string.match(st, "^[%d%.%s%,/]+$")
-                        and not string.match(st, hpPattern) then
+                        if #st >= 2 and #st <= 40 and not string.match(st, "^[%d%.%s%,/]+$") and not string.match(st, hpPattern) then
                             bossBarCache.name = st
                             break
                         end
@@ -1262,24 +1501,16 @@ do
         bossBarCache.hasCache = (bossBarCache.hp ~= nil and bossBarCache.maxHp ~= nil)
         return bossBarCache.name, bossBarCache.hp, bossBarCache.maxHp
     end
-
     isBossMob = function(mob, hp, displayName)
         if matchBossName(displayName) or matchBossName(mob and mob.Name) then return true end
         if isStructureName(displayName) then return false end
         if hasBossEmoji(displayName) then return true end
-        for _, attrName in ipairs({
-            "IsBoss","isBoss","Boss","boss",
-            "IsElite","isElite","Elite","elite",
-            "Unique","unique","IsUnique","isUnique",
-            "BossType","bossType","Rank","rank",
-        }) do
+        for _, attrName in ipairs({"IsBoss","isBoss","Boss","boss","IsElite","isElite","Elite","elite","Unique","unique","IsUnique","isUnique","BossType","bossType","Rank","rank"}) do
             if mob:GetAttribute(attrName) == true then return true end
         end
         for _, ch in ipairs(mob:GetChildren()) do
             local n = string.lower(ch.Name)
-            if string.find(n, "uniquebosshealth", 1, true) or string.find(n, "bosshealth", 1, true) or string.find(n, "uniquehealth", 1, true) then
-                return true
-            end
+            if string.find(n, "uniquebosshealth", 1, true) or string.find(n, "bosshealth", 1, true) or string.find(n, "uniquehealth", 1, true) then return true end
         end
         if displayName and hp and hp > 0 then
             local lower = string.lower(displayName)
@@ -1287,11 +1518,9 @@ do
         end
         return false
     end
-
     local MOB_CACHE_TTL = 0.6
     local mobCache = { data=nil, time=0 }
     invalidateMobCache = function() mobCache.data = nil mobCache.time = 0 end
-
     getAllMobs = function()
         local now = tick()
         if mobCache.data and (now - mobCache.time) < MOB_CACHE_TTL then return mobCache.data end
@@ -1317,7 +1546,6 @@ do
         local folder = getNpcsFolder()
         if folder then for _, m in ipairs(folder:GetChildren()) do tryAdd(m) end end
         for _, m in ipairs(workspace:GetChildren()) do tryAdd(m) end
-
         local barName, barHp, barMaxHp = sniffBossBar()
         if barName and matchBossName(barName) then
             local barLower = string.lower(barName)
@@ -1327,13 +1555,10 @@ do
                 if string.find(n, barLower, 1, true) or string.find(barLower, n, 1, true) then
                     item.isBoss = true
                     if not item.hp then
-                        item.hp = barHp
-                        item.maxHp = barMaxHp
-                        item.hpText = tostring(barHp)
-                        item.maxHpText = tostring(barMaxHp)
+                        item.hp = barHp item.maxHp = barMaxHp
+                        item.hpText = tostring(barHp) item.maxHpText = tostring(barMaxHp)
                     end
-                    alreadyInList = true
-                    break
+                    alreadyInList = true break
                 end
             end
             if not alreadyInList then
@@ -1361,7 +1586,6 @@ do
                 end
             end
         end
-
         mobCache.data = list mobCache.time = now
         return list
     end
@@ -1373,7 +1597,6 @@ local function teleportTo(pos)
     if not char then return end
     pcall(function() char:PivotTo(CFrame.new(pos)) end)
 end
-
 local ZONE_MAX_DIST = 3000
 local function getZoneByPos(pos)
     if not pos then return "?" end
@@ -1385,7 +1608,6 @@ local function getZoneByPos(pos)
     if nd > ZONE_MAX_DIST then return "?" end
     return nn or "?"
 end
-
 local function getNearestMob()
     local char = LocalPlayer.Character
     if not char then return nil end
@@ -1398,7 +1620,6 @@ local function getNearestMob()
     end
     return near, nd
 end
-
 local function clickLeftMouse()
     if mouse1click then
         local ok = pcall(mouse1click)
@@ -1409,20 +1630,17 @@ local function clickLeftMouse()
         if ok then return true end
     end
     local cam = workspace.CurrentCamera
-    local center = cam and Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
-        or Vector2.new(400, 300)
+    local center = cam and Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2) or Vector2.new(400, 300)
     return pcall(function()
         VirtualUser:Button1Down(center)
         task.wait(0.03)
         VirtualUser:Button1Up(center)
     end)
 end
-
--- ★ Патч: HTTPS-only + KRNL
 local function httpGet(url)
     if type(url) ~= "string" then return nil end
     if not string.match(url, "^https://") then
-        warn("[SPU] httpGet: разрешены только https:// URL")
+        warn("[SPU] httpGet: only https:// URL allowed")
         return nil
     end
     local ok, resp
@@ -1455,12 +1673,12 @@ end
 --   ОСНОВНОЕ
 -- ═══════════════════════════════════════════════════════════
 
-makeSection(pageMain, "Сервер", "🌐")
+makeSection(pageMain, "sec_server", "🌐")
 do
     local lastHopTime = 0
     local function serverHop()
         if tick() - lastHopTime < 3 then
-            showToast("Подожди перед следующим хопом", C.warn, "⏳")
+            showToast(T("toast_wait_hop"), C.warn, "⏳")
             return
         end
         lastHopTime = tick()
@@ -1473,7 +1691,8 @@ do
                         AutoClickerCPS=Config.AutoClickerCPS,
                         SpeedValue=Config.SpeedValue, FlySpeed=Config.FlySpeed,
                         RadarRange=Config.RadarRange,
-                        ToggleKey=Config.ToggleKey and Config.ToggleKey.Name or "Delete"},
+                        ToggleKey=Config.ToggleKey and Config.ToggleKey.Name or "Delete",
+                        Language=LANG},
                     Toggles={}, Theme=currentTheme.name,
                     SavedPositions={}, Favorites=favoritedPoints, Friends=savedFriends,
                 }
@@ -1482,13 +1701,13 @@ do
                 writefile(CONFIG_PREFIX.."_autoload.json", HttpService:JSONEncode(data))
             end)
         end
-        showToast("Поиск сервера...", C.accent, "🌐")
+        showToast(T("toast_search_server"), C.accent, "🌐")
         local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
         local data = httpGet(url)
-        if not data then showToast("HTTP недоступен", C.danger, "⚠") return end
+        if not data then showToast(T("toast_http_unavail"), C.danger, "⚠") return end
         local ok, parsed = pcall(function() return HttpService:JSONDecode(data) end)
         if not ok or not parsed or not parsed.data then
-            showToast("Ошибка парсинга серверов", C.danger, "⚠")
+            showToast(T("toast_parse_error"), C.danger, "⚠")
             return
         end
         local candidates = {}
@@ -1497,18 +1716,16 @@ do
                 table.insert(candidates, srv)
             end
         end
-        if #candidates == 0 then showToast("Нет доступных серверов", C.warn, "⚠") return end
+        if #candidates == 0 then showToast(T("toast_no_servers"), C.warn, "⚠") return end
         local target = candidates[math.random(1, #candidates)]
-        showToast(string.format("Хоп: %d/%d игроков", target.playing, target.maxPlayers), C.success, "🌐")
+        showToast(string.format(T("toast_hop"), target.playing, target.maxPlayers), C.success, "🌐")
         task.wait(0.4)
-        pcall(function()
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, target.id, LocalPlayer)
-        end)
+        pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, target.id, LocalPlayer) end)
     end
-    createButton(pageMain, "Server Hop (сменить сервер)", C.accent, serverHop, "🌐")
+    createButton(pageMain, "btn_server_hop", C.accent, serverHop, "🌐")
 end
 
-makeSection(pageMain, "Прыжки и движение", "🦘")
+makeSection(pageMain, "sec_jump", "🦘")
 do
     local infiniteJumpConn
     local function toggleInfiniteJump(state)
@@ -1522,16 +1739,16 @@ do
                     if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
                 end
             end))
-            showToast("Бесконечные прыжки: ON", C.success, "🦘")
+            showToast(T("toast_inf_jump_on"), C.success, "🦘")
         else
             if infiniteJumpConn then pcall(function() infiniteJumpConn:Disconnect() end) infiniteJumpConn = nil end
-            showToast("Бесконечные прыжки: OFF", C.warn, "🦘")
+            showToast(T("toast_inf_jump_off"), C.warn, "🦘")
         end
     end
-    createToggle(pageMain, "Бесконечные прыжки", false, toggleInfiniteJump, "InfiniteJump", "Прыгай без остановки")
+    createToggle(pageMain, "tog_inf_jump", false, toggleInfiniteJump, "InfiniteJump", "desc_inf_jump")
 end
 
-makeSection(pageMain, "Скорость", "🏃")
+makeSection(pageMain, "sec_speed", "🏃")
 do
     local speedTaskId = nil
     local function applySpeedHack()
@@ -1539,98 +1756,73 @@ do
         local char = LocalPlayer.Character
         if not char then return end
         local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum and hum.WalkSpeed ~= Config.SpeedValue then
-            hum.WalkSpeed = Config.SpeedValue
-        end
+        if hum and hum.WalkSpeed ~= Config.SpeedValue then hum.WalkSpeed = Config.SpeedValue end
     end
     local function toggleSpeedHack(state)
         Config.SpeedHack = state
         if state then
             applySpeedHack()
-            if not speedTaskId then
-                speedTaskId = scheduleHeartbeat(applySpeedHack, 0.1, "speedHack")
-            end
-            showToast("Speed Hack: "..Config.SpeedValue, C.success, "🏃")
+            if not speedTaskId then speedTaskId = scheduleHeartbeat(applySpeedHack, 0.1, "speedHack") end
+            showToast(string.format(T("toast_speed_on"), Config.SpeedValue), C.success, "🏃")
         else
             if speedTaskId then unscheduleHeartbeat(speedTaskId) speedTaskId = nil end
             local char = LocalPlayer.Character
             local hum = char and char:FindFirstChildOfClass("Humanoid")
             if hum then hum.WalkSpeed = 16 end
-            showToast("Speed Hack выключен", C.warn, "🏃")
+            showToast(T("toast_speed_off"), C.warn, "🏃")
         end
     end
-    createToggle(pageMain, "Speed Hack", false, toggleSpeedHack, "SpeedHack", "Ускорение передвижения")
-    createSlider(pageMain, "СКОРОСТЬ ХОДЬБЫ", 16, 500, 100, C.success, function(v)
+    createToggle(pageMain, "tog_speed", false, toggleSpeedHack, "SpeedHack", "desc_speed")
+    createSlider(pageMain, "lbl_speed_value", 16, 500, 100, C.success, function(v)
         Config.SpeedValue = v
         if Config.SpeedHack then applySpeedHack() end
     end, "SpeedValue")
 end
 
-makeSection(pageMain, "Полёт", "🕊")
+makeSection(pageMain, "sec_flight", "🕊")
 local destroyFly
 do
     local flyAtt, flyLV, flyAlignAtt, flyAO, flyConn = nil, nil, nil, nil, nil
     local FLY_KEYS = {
-        forward  = Enum.KeyCode.W,
-        backward = Enum.KeyCode.S,
-        left     = Enum.KeyCode.A,
-        right    = Enum.KeyCode.D,
-        up       = Enum.KeyCode.Space,
-        down     = Enum.KeyCode.LeftControl,
+        forward=Enum.KeyCode.W, backward=Enum.KeyCode.S, left=Enum.KeyCode.A, right=Enum.KeyCode.D,
+        up=Enum.KeyCode.Space, down=Enum.KeyCode.LeftControl,
     }
-
     local function cleanupFlyInstances()
         if flyLV then pcall(function() flyLV:Destroy() end) flyLV = nil end
         if flyAO then pcall(function() flyAO:Destroy() end) flyAO = nil end
         if flyAtt then pcall(function() flyAtt:Destroy() end) flyAtt = nil end
         if flyAlignAtt then pcall(function() flyAlignAtt:Destroy() end) flyAlignAtt = nil end
     end
-
     destroyFly = function()
         if flyConn then pcall(function() flyConn:Disconnect() end) flyConn = nil end
         cleanupFlyInstances()
     end
-
     local function ensureFlyInstances(root)
         if not flyAtt or not flyAtt.Parent then
-            flyAtt = Instance.new("Attachment")
-            flyAtt.Name = "SPU_FlyAtt"
-            flyAtt.Parent = root
+            flyAtt = Instance.new("Attachment") flyAtt.Name = "SPU_FlyAtt" flyAtt.Parent = root
         end
         if not flyLV or not flyLV.Parent then
             flyLV = Instance.new("LinearVelocity")
-            flyLV.Name = "SPU_FlyLV"
-            flyLV.Attachment0 = flyAtt
-            flyLV.MaxForce = 1e9
-            flyLV.VectorVelocity = Vector3.zero
-            flyLV.RelativeTo = Enum.ActuatorRelativeTo.World
-            flyLV.Parent = root
+            flyLV.Name = "SPU_FlyLV" flyLV.Attachment0 = flyAtt
+            flyLV.MaxForce = 1e9 flyLV.VectorVelocity = Vector3.zero
+            flyLV.RelativeTo = Enum.ActuatorRelativeTo.World flyLV.Parent = root
         end
         if not flyAlignAtt or not flyAlignAtt.Parent then
-            flyAlignAtt = Instance.new("Attachment")
-            flyAlignAtt.Name = "SPU_FlyAlignAtt"
-            flyAlignAtt.Parent = root
+            flyAlignAtt = Instance.new("Attachment") flyAlignAtt.Name = "SPU_FlyAlignAtt" flyAlignAtt.Parent = root
         end
         if not flyAO or not flyAO.Parent then
             flyAO = Instance.new("AlignOrientation")
-            flyAO.Name = "SPU_FlyAO"
-            flyAO.Attachment0 = flyAlignAtt
+            flyAO.Name = "SPU_FlyAO" flyAO.Attachment0 = flyAlignAtt
             flyAO.Mode = Enum.OrientationAlignmentMode.OneAttachment
-            flyAO.MaxTorque = 1e9
-            flyAO.Responsiveness = 100
-            flyAO.Parent = root
+            flyAO.MaxTorque = 1e9 flyAO.Responsiveness = 100 flyAO.Parent = root
         end
     end
-
     local function stopFly()
         destroyFly()
         local char = LocalPlayer.Character
         local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
-        end
+        if hum then pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end) end
     end
-
     local function startFly()
         stopFly()
         local char = LocalPlayer.Character
@@ -1638,9 +1830,7 @@ do
         local hrp = char:FindFirstChild("HumanoidRootPart")
         local hum = char:FindFirstChildOfClass("Humanoid")
         if not hrp or not hum then Config.FlyEnabled = false return end
-
         ensureFlyInstances(hrp)
-
         flyConn = track(RunService.RenderStepped:Connect(function()
             if not Config.FlyEnabled or isShuttingDown then return end
             local c = LocalPlayer.Character
@@ -1658,33 +1848,26 @@ do
             if UserInputService:IsKeyDown(FLY_KEYS.right)    then moveDir += cam.CFrame.RightVector end
             if UserInputService:IsKeyDown(FLY_KEYS.up)       then moveDir += Vector3.new(0,1,0) end
             if UserInputService:IsKeyDown(FLY_KEYS.down)     then moveDir -= Vector3.new(0,1,0) end
-            if moveDir.Magnitude > 0 then
-                moveDir = moveDir.Unit * Config.FlySpeed
-            end
+            if moveDir.Magnitude > 0 then moveDir = moveDir.Unit * Config.FlySpeed end
             if flyLV then flyLV.VectorVelocity = moveDir end
             if flyAO then flyAO.CFrame = cam.CFrame end
         end))
     end
-
     local function toggleFly(state)
         Config.FlyEnabled = state
         if state then
             startFly()
-            if Config.FlyEnabled then
-                showToast("Fly: "..Config.FlySpeed, C.success, "🕊")
-            end
+            if Config.FlyEnabled then showToast(string.format(T("toast_fly_on"), Config.FlySpeed), C.success, "🕊") end
         else
             stopFly()
-            showToast("Fly выключен", C.warn, "🕊")
+            showToast(T("toast_fly_off"), C.warn, "🕊")
         end
     end
-    createToggle(pageMain, "Fly (полёт)", false, toggleFly, "Fly", "W/A/S/D + Space / LeftCtrl — управление")
-    createSlider(pageMain, "СКОРОСТЬ ПОЛЁТА", 10, 500, 60, C.accent2, function(v)
-        Config.FlySpeed = v
-    end, "FlySpeed")
+    createToggle(pageMain, "tog_fly", false, toggleFly, "Fly", "desc_fly")
+    createSlider(pageMain, "lbl_fly_speed", 10, 500, 60, C.accent2, function(v) Config.FlySpeed = v end, "FlySpeed")
 end
 
-makeSection(pageMain, "Радар", "📡")
+makeSection(pageMain, "sec_radar", "📡")
 local radarGui, radarRoot
 do
     radarGui = new("ScreenGui", {
@@ -1692,7 +1875,6 @@ do
         IgnoreGuiInset=true, DisplayOrder=15, Parent=HIDDEN_PARENT
     })
     protectGui(radarGui)
-
     local RADAR_SIZE = 200
     radarRoot = new("Frame", {
         Size=UDim2.new(0,RADAR_SIZE,0,RADAR_SIZE),
@@ -1703,7 +1885,6 @@ do
     corner(radarRoot, DS.R.card)
     gradient(radarRoot, C.bgAlt, C.bg, 135)
     stroke(radarRoot, C.accent, 1.2, 0.3)
-
     for i = 1, 3 do
         local ring = new("Frame", {
             Size=UDim2.new(0, RADAR_SIZE * i / 4, 0, RADAR_SIZE * i / 4),
@@ -1718,50 +1899,32 @@ do
         BackgroundColor3=C.border, BackgroundTransparency=0.5, BorderSizePixel=0, Parent=radarRoot })
     new("Frame", { Size=UDim2.new(0,1,1,0), Position=UDim2.new(0.5,0,0,0),
         BackgroundColor3=C.border, BackgroundTransparency=0.5, BorderSizePixel=0, Parent=radarRoot })
-
     local radarCenter = new("Frame", {
-        Size=UDim2.new(0,10,0,10),
-        Position=UDim2.new(0.5,-5,0.5,-5),
+        Size=UDim2.new(0,10,0,10), Position=UDim2.new(0.5,-5,0.5,-5),
         BackgroundColor3=C.success, BorderSizePixel=0, Parent=radarRoot
     })
     corner(radarCenter, DS.R.round)
     stroke(radarCenter, Color3.fromRGB(255,255,255), 1.5, 0)
-
-    new("TextLabel", {
-        Size=UDim2.new(1,0,0,16), Position=UDim2.new(0,8,0,6),
+    new("TextLabel", { Size=UDim2.new(1,0,0,16), Position=UDim2.new(0,8,0,6),
         BackgroundTransparency=1, Text="📡 RADAR",
         TextColor3=C.textDim, Font=DS.F.bold, TextSize=10,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=radarRoot
-    })
-
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=radarRoot })
     local radarDots = {}
     local dotPool = {}
     local radarTaskId = nil
-
     local function acquireDot()
         local n = #dotPool
-        if n > 0 then
-            local d = dotPool[n]
-            dotPool[n] = nil
-            return d
-        end
+        if n > 0 then local d = dotPool[n] dotPool[n] = nil return d end
         local d = new("Frame", {
-            Size=UDim2.new(0,6,0,6),
-            AnchorPoint=Vector2.new(0.5,0.5),
-            BackgroundColor3=Color3.fromRGB(255,255,255),
-            BorderSizePixel=0, Parent=radarRoot
+            Size=UDim2.new(0,6,0,6), AnchorPoint=Vector2.new(0.5,0.5),
+            BackgroundColor3=Color3.fromRGB(255,255,255), BorderSizePixel=0, Parent=radarRoot
         })
         corner(d, DS.R.round)
         return d
     end
-
     local function releaseDot(d)
-        if d and d.Parent then
-            d.Visible = false
-            table.insert(dotPool, d)
-        end
+        if d and d.Parent then d.Visible = false table.insert(dotPool, d) end
     end
-
     local function updateRadar()
         if not Config.Radar or isShuttingDown then return end
         local char = LocalPlayer.Character
@@ -1771,41 +1934,29 @@ do
         local range = Config.RadarRange
         local halfSize = RADAR_SIZE / 2
         local scale = halfSize / range
-
         local seen = {}
         local function placeDot(key, worldPos, color, size)
             local rel = worldPos - origin
             local dx = rel.X * scale
             local dz = rel.Z * scale
             if math.abs(dx) > halfSize - 4 or math.abs(dz) > halfSize - 4 then
-                if radarDots[key] then
-                    releaseDot(radarDots[key])
-                    radarDots[key] = nil
-                end
+                if radarDots[key] then releaseDot(radarDots[key]) radarDots[key] = nil end
                 return
             end
             seen[key] = true
             local dot = radarDots[key]
-            if not dot then
-                dot = acquireDot()
-                radarDots[key] = dot
-            end
+            if not dot then dot = acquireDot() radarDots[key] = dot end
             dot.BackgroundColor3 = color
             dot.Size = UDim2.new(0,size,0,size)
             dot.Position = UDim2.new(0.5, dx, 0.5, dz)
             dot.Visible = true
         end
-
         if Config.RadarShowMobs or Config.RadarShowBosses then
             for _, data in ipairs(getAllMobs()) do
                 if data.isBoss then
-                    if Config.RadarShowBosses then
-                        placeDot(data.model, data.hrp.Position, C.gold, 9)
-                    end
+                    if Config.RadarShowBosses then placeDot(data.model, data.hrp.Position, C.gold, 9) end
                 else
-                    if Config.RadarShowMobs then
-                        placeDot(data.model, data.hrp.Position, Color3.fromRGB(255,120,80), 6)
-                    end
+                    if Config.RadarShowMobs then placeDot(data.model, data.hrp.Position, Color3.fromRGB(255,120,80), 6) end
                 end
             end
         end
@@ -1813,48 +1964,37 @@ do
             for _, plr in ipairs(Players:GetPlayers()) do
                 if plr ~= LocalPlayer and plr.Character then
                     local hp = plr.Character:FindFirstChild("HumanoidRootPart")
-                    if hp then
-                        placeDot("plr_"..plr.UserId, hp.Position, Color3.fromRGB(90,160,255), 7)
-                    end
+                    if hp then placeDot("plr_"..plr.UserId, hp.Position, Color3.fromRGB(90,160,255), 7) end
                 end
             end
         end
-
         for key, dot in pairs(radarDots) do
-            if not seen[key] then
-                releaseDot(dot)
-                radarDots[key] = nil
-            end
+            if not seen[key] then releaseDot(dot) radarDots[key] = nil end
         end
     end
-
     local function toggleRadar(state)
         Config.Radar = state
         radarRoot.Visible = state
         if state then
-            if not radarTaskId then
-                radarTaskId = scheduleHeartbeat(updateRadar, 0.1, "radarUpdate")
-            end
+            if not radarTaskId then radarTaskId = scheduleHeartbeat(updateRadar, 0.1, "radarUpdate") end
             task.defer(updateRadar)
-            showToast("Радар включён", C.accent2, "📡")
+            showToast(T("toast_radar_on"), C.accent2, "📡")
         else
             if radarTaskId then unscheduleHeartbeat(radarTaskId) radarTaskId = nil end
             for _, dot in pairs(radarDots) do if dot.Parent then dot:Destroy() end end
             for _, dot in ipairs(dotPool) do if dot.Parent then dot:Destroy() end end
-            radarDots = {}
-            dotPool = {}
-            showToast("Радар выключен", C.warn, "📡")
+            radarDots = {} dotPool = {}
+            showToast(T("toast_radar_off"), C.warn, "📡")
         end
     end
-
-    createToggle(pageMain, "Радар (мини-карта)", false, toggleRadar, "Radar", "Мобы, боссы и игроки вокруг тебя")
-    createSlider(pageMain, "РАДИУС РАДАРА", 100, 1000, 300, C.accent2, function(v) Config.RadarRange = v end, "RadarRange")
-    createToggle(pageMain, "Мобы на радаре", true, function(s) Config.RadarShowMobs = s end, "RadarShowMobs")
-    createToggle(pageMain, "Боссы на радаре", true, function(s) Config.RadarShowBosses = s end, "RadarShowBosses")
-    createToggle(pageMain, "Игроки на радаре", true, function(s) Config.RadarShowPlayers = s end, "RadarShowPlayers")
+    createToggle(pageMain, "tog_radar", false, toggleRadar, "Radar", "desc_radar")
+    createSlider(pageMain, "lbl_radar_range", 100, 1000, 300, C.accent2, function(v) Config.RadarRange = v end, "RadarRange")
+    createToggle(pageMain, "tog_radar_mobs", true, function(s) Config.RadarShowMobs = s end, "RadarShowMobs")
+    createToggle(pageMain, "tog_radar_bosses", true, function(s) Config.RadarShowBosses = s end, "RadarShowBosses")
+    createToggle(pageMain, "tog_radar_players", true, function(s) Config.RadarShowPlayers = s end, "RadarShowPlayers")
 end
 
-makeSection(pageMain, "Призрак", "👻")
+makeSection(pageMain, "sec_ghost", "👻")
 do
     local noclipTaskId = nil
     local noclipOriginals = setmetatable({}, {__mode = "k"})
@@ -1864,9 +2004,7 @@ do
         if not char then return end
         for _, part in ipairs(char:GetDescendants()) do
             if part:IsA("BasePart") then
-                if noclipOriginals[part] == nil then
-                    noclipOriginals[part] = part.CanCollide
-                end
+                if noclipOriginals[part] == nil then noclipOriginals[part] = part.CanCollide end
                 if part.CanCollide then part.CanCollide = false end
             end
         end
@@ -1875,10 +2013,8 @@ do
         Config.Noclip = state
         if state then
             applyNoclip()
-            if not noclipTaskId then
-                noclipTaskId = scheduleHeartbeat(applyNoclip, 0.05, "noclip")
-            end
-            showToast("Призрак: ON", C.accent2, "👻")
+            if not noclipTaskId then noclipTaskId = scheduleHeartbeat(applyNoclip, 0.05, "noclip") end
+            showToast(T("toast_ghost_on"), C.accent2, "👻")
         else
             if noclipTaskId then unscheduleHeartbeat(noclipTaskId) noclipTaskId = nil end
             local char = LocalPlayer.Character
@@ -1890,10 +2026,10 @@ do
                 end
             end
             noclipOriginals = setmetatable({}, {__mode = "k"})
-            showToast("Призрак: OFF", C.warn, "👻")
+            showToast(T("toast_ghost_off"), C.warn, "👻")
         end
     end
-    createToggle(pageMain, "Призрак (сквозь стены)", false, toggleNoclip, "Noclip", "Проходи сквозь стены и текстуры")
+    createToggle(pageMain, "tog_noclip", false, toggleNoclip, "Noclip", "desc_noclip")
 end
 
 -- ═══════════════════════════════════════════════════════════
@@ -1909,10 +2045,10 @@ local function tpToCoords(zoneName, coords)
         pcall(function() hrp.CFrame = CFrame.new(coords) end)
         task.wait(0.15)
     end
-    showToast("Телепорт: "..zoneName, C.accent, "🌀")
+    showToast(string.format(T("toast_tp"), zoneName), C.accent, "🌀")
 end
 
-makeSection(pageZones, "Быстрый телепорт", "🌀")
+makeSection(pageZones, "sec_tp", "🌀")
 do
     local zonesList = new("Frame", { Size=UDim2.new(1,-8,0,0), BackgroundTransparency=1, AutomaticSize=Enum.AutomaticSize.Y, Parent=pageZones })
     new("UIListLayout", { Padding=UDim.new(0,DS.S.sm), SortOrder=Enum.SortOrder.LayoutOrder, Parent=zonesList })
@@ -1945,7 +2081,7 @@ do
     end
 end
 
-makeSection(pageZones, "Мои точки", "📍")
+makeSection(pageZones, "sec_my_points", "📍")
 savedPositions, favoritedPoints = {}, {}
 do
     local savedList = new("ScrollingFrame", {
@@ -1956,28 +2092,23 @@ do
     stroke(savedList, C.border, 1, 0.5)
     new("UIListLayout", { Padding=UDim.new(0,5), Parent=savedList })
     new("UIPadding", { PaddingTop=UDim.new(0,6), PaddingBottom=UDim.new(0,6), PaddingLeft=UDim.new(0,6), PaddingRight=UDim.new(0,6), Parent=savedList })
-
     local function updateSavedListSize()
         local count = 0
         for _ in pairs(savedPositions) do count = count + 1 end
-        if count == 0 then
-            savedList.Size = UDim2.new(1,-8,0,0) savedList.Visible = false
-        else
-            savedList.Size = UDim2.new(1,-8,0,math.min(150, count*46+12))
-            savedList.Visible = true
-        end
+        if count == 0 then savedList.Size = UDim2.new(1,-8,0,0) savedList.Visible = false
+        else savedList.Size = UDim2.new(1,-8,0,math.min(150, count*46+12)) savedList.Visible = true end
     end
     local function getUniquePointName()
         local maxN = 0
         for n, _ in pairs(savedPositions) do
-            local num = tonumber(string.match(n, "^Точка (%d+)$"))
+            local num = tonumber(string.match(n, "^Точка (%d+)$")) or tonumber(string.match(n, "^Point (%d+)$"))
             if num and num > maxN then maxN = num end
         end
-        local candidate = "Точка "..(maxN+1)
-        while savedPositions[candidate] do maxN = maxN + 1 candidate = "Точка "..maxN end
+        local prefix = (LANG == "ENG") and "Point " or "Точка "
+        local candidate = prefix..(maxN+1)
+        while savedPositions[candidate] do maxN = maxN + 1 candidate = prefix..maxN end
         return candidate
     end
-
     rebuildSavedList = function()
         for _, ch in ipairs(savedList:GetChildren()) do
             if not ch:IsA("UIListLayout") and not ch:IsA("UIPadding") then ch:Destroy() end
@@ -2027,7 +2158,7 @@ do
             end)
             delBtn.Position = UDim2.new(1,-34,0.5,-14)
             renameBtn.MouseButton1Click:Connect(function()
-                showInputDialog("Переименовать", item.name, "Новое имя...", function(newName)
+                showInputDialog(T("dlg_rename"), item.name, T("dlg_new_name"), function(newName)
                     if newName ~= item.name then
                         local posData, fav = savedPositions[item.name], favoritedPoints[item.name]
                         savedPositions[item.name] = nil favoritedPoints[item.name] = nil
@@ -2040,8 +2171,7 @@ do
         end
         task.defer(function() updateSavedListSize() end)
     end
-
-    createButton(pageZones, "Запомнить текущую позицию", C.gold, function()
+    createButton(pageZones, "btn_save_pos", C.gold, function()
         local char = LocalPlayer.Character
         if not char then return end
         local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -2049,11 +2179,11 @@ do
         local name = getUniquePointName()
         savedPositions[name] = hrp.Position
         rebuildSavedList()
-        showToast("Сохранено: "..name, C.gold, "📍")
+        showToast(string.format(T("toast_saved"), name), C.gold, "📍")
     end, "📍")
 end
 
-makeSection(pageZones, "Боссы — топ-оружие", "💀")
+makeSection(pageZones, "sec_bosses_top", "💀")
 do
     local bossList = new("Frame", { Size=UDim2.new(1,-8,0,0), BackgroundTransparency=1,
         AutomaticSize=Enum.AutomaticSize.Y, Parent=pageZones })
@@ -2094,13 +2224,11 @@ do
             TweenService:Create(bs, TweenInfo.new(DS.A.fast), { Transparency=0.45 }):Play()
             TweenService:Create(iconBox, TweenInfo.new(DS.A.fast), { BackgroundTransparency=0.82 }):Play()
         end)
-        btn.MouseButton1Click:Connect(function()
-            tpToCoords(boss.name, boss.coords)
-        end)
+        btn.MouseButton1Click:Connect(function() tpToCoords(boss.name, boss.coords) end)
     end
 end
 
-makeSection(pageZones, "Боссы", "🗡")
+makeSection(pageZones, "sec_bosses", "🗡")
 do
     for _, group in ipairs(BOSSES_BY_ZONE) do
         local header = new("Frame", { Size=UDim2.new(1,-8,0,22), BackgroundTransparency=1, Parent=pageZones })
@@ -2110,25 +2238,21 @@ do
         new("TextLabel", { Size=UDim2.new(1,-10,1,0), Position=UDim2.new(0,10,0,0), BackgroundTransparency=1,
             Text=string.upper(group.zone), TextColor3=C.gold, Font=DS.F.bold, TextSize=10,
             TextXAlignment=Enum.TextXAlignment.Left, Parent=header })
-
         local list = new("Frame", { Size=UDim2.new(1,-8,0,0), BackgroundTransparency=1,
             AutomaticSize=Enum.AutomaticSize.Y, Parent=pageZones })
         new("UIListLayout", { Padding=UDim.new(0,DS.S.xs), SortOrder=Enum.SortOrder.LayoutOrder, Parent=list })
-
         for i, boss in ipairs(group.bosses) do
             local btn = new("TextButton", { Size=UDim2.new(1,0,0,44), BackgroundColor3=C.card,
                 BackgroundTransparency=0.02, BorderSizePixel=0, AutoButtonColor=false,
                 Text="", LayoutOrder=i, Parent=list })
             corner(btn, DS.R.card)
             local bs = stroke(btn, C.border, 1, 0.5)
-
             local iconFrame = new("Frame", { Size=UDim2.new(0,28,0,28), Position=UDim2.new(0,10,0.5,-14),
                 BackgroundColor3=C.danger, BackgroundTransparency=0.85, BorderSizePixel=0, Parent=btn })
             corner(iconFrame, DS.R.round)
             stroke(iconFrame, C.danger, 1, 0.4)
             new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
                 Text="💀", TextColor3=C.danger, Font=DS.F.bold, TextSize=13, Parent=iconFrame })
-
             new("TextLabel", { Size=UDim2.new(1,-130,0,16), Position=UDim2.new(0,48,0,7),
                 BackgroundTransparency=1, Text=boss.name, TextColor3=C.text,
                 Font=DS.F.bold, TextSize=12.5, TextXAlignment=Enum.TextXAlignment.Left, Parent=btn })
@@ -2140,7 +2264,6 @@ do
             new("TextLabel", { Size=UDim2.new(0,22,0,22), Position=UDim2.new(1,-32,0.5,-11),
                 BackgroundTransparency=1, Text="→", TextColor3=C.gold,
                 Font=DS.F.bold, TextSize=15, Parent=btn })
-
             btn.MouseEnter:Connect(function()
                 TweenService:Create(btn, TweenInfo.new(DS.A.fast), { BackgroundColor3=C.hover, BackgroundTransparency=0 }):Play()
                 TweenService:Create(bs, TweenInfo.new(DS.A.fast), { Transparency=0.15 }):Play()
@@ -2150,9 +2273,7 @@ do
                 TweenService:Create(btn, TweenInfo.new(DS.A.fast), { BackgroundColor3=restore, BackgroundTransparency=0.02 }):Play()
                 TweenService:Create(bs, TweenInfo.new(DS.A.fast), { Transparency=0.5 }):Play()
             end)
-            btn.MouseButton1Click:Connect(function()
-                tpToCoords(group.zone.." • "..boss.name, boss.coords)
-            end)
+            btn.MouseButton1Click:Connect(function() tpToCoords(group.zone.." • "..boss.name, boss.coords) end)
         end
     end
 end
@@ -2160,12 +2281,11 @@ end
 -- ═══════════════════════════════════════════════════════════
 --   ИГРОКИ
 -- ═══════════════════════════════════════════════════════════
-makeSection(pageTP, "Список игроков", "👥")
+makeSection(pageTP, "sec_players", "👥")
 do
     local tpList = new("Frame", { Size=UDim2.new(1,-8,0,0), BackgroundTransparency=1,
         AutomaticSize=Enum.AutomaticSize.Y, Parent=pageTP })
     new("UIListLayout", { Padding=UDim.new(0,DS.S.sm), SortOrder=Enum.SortOrder.LayoutOrder, Parent=tpList })
-
     local lastKnownPos = {}
     local function getPlayerPosition(plr)
         local char = plr.Character
@@ -2191,12 +2311,10 @@ do
         end
         local cached = lastKnownPos[plr.UserId]
         if cached then return cached.pos, "cache", math.floor(tick() - cached.time) end
-        return nil, "нет", 0
+        return nil, "none", 0
     end
-
     local tpRows = {}
     local tpEmptyLabel = nil
-
     local function createTPRow(plr, order)
         local btn = new("TextButton", {
             Size=UDim2.new(1,0,0,58), BackgroundColor3=C.card, Text="",
@@ -2233,14 +2351,13 @@ do
             local fresh = getPlayerPosition(plr)
             if fresh then
                 teleportTo(Vector3.new(fresh.X, fresh.Y+3, fresh.Z))
-                showToast("Телепорт к "..plr.Name, C.accent, "✓")
+                showToast(string.format(T("player_tp_to"), plr.Name), C.accent, "✓")
             else
-                showToast("Позиция "..plr.Name.." недоступна", C.danger, "⚠")
+                showToast(string.format(T("player_pos_unavail"), plr.Name), C.danger, "⚠")
             end
         end)
         return {btn=btn, nameLbl=nameLbl, subLbl=subLbl}
     end
-
     local function refreshTP()
         if isShuttingDown then return end
         local seen = {}
@@ -2250,17 +2367,12 @@ do
                 seen[plr.UserId] = true
                 order = order + 1
                 local row = tpRows[plr.UserId]
-                if not row then
-                    row = createTPRow(plr, order)
-                    tpRows[plr.UserId] = row
-                else
-                    row.btn.LayoutOrder = order
-                    if row.nameLbl.Text ~= plr.Name then row.nameLbl.Text = plr.Name end
-                end
+                if not row then row = createTPRow(plr, order) tpRows[plr.UserId] = row
+                else row.btn.LayoutOrder = order if row.nameLbl.Text ~= plr.Name then row.nameLbl.Text = plr.Name end end
                 local pos, source, age = getPlayerPosition(plr)
                 if pos then
                     local zone = getZoneByPos(pos)
-                    local suffix = source == "cache" and ("  •  "..age.."с назад") or ""
+                    local suffix = source == "cache" and ("  •  "..age.."s") or ""
                     local newSub = string.format("%d, %d, %d  •  %s%s",
                         math.floor(pos.X), math.floor(pos.Y), math.floor(pos.Z), zone, suffix)
                     if row.subLbl.Text ~= newSub then row.subLbl.Text = newSub end
@@ -2269,9 +2381,7 @@ do
                         if row.nameLbl.TextColor3 ~= liveColor then row.nameLbl.TextColor3 = liveColor end
                     end
                 else
-                    if row.subLbl.Text ~= "📍 Позиция недоступна" then
-                        row.subLbl.Text = "📍 Позиция недоступна"
-                    end
+                    if row.subLbl.Text ~= T("lbl_pos_unavailable") then row.subLbl.Text = T("lbl_pos_unavailable") end
                 end
             end
         end
@@ -2281,15 +2391,17 @@ do
         if order == 0 then
             if not tpEmptyLabel then
                 tpEmptyLabel = new("TextLabel", {
-                    Size=UDim2.new(1,0,0,40), BackgroundTransparency=1, Text="Других игроков нет",
+                    Size=UDim2.new(1,0,0,40), BackgroundTransparency=1,
                     TextColor3=C.textMuted, Font=DS.F.subtle, TextSize=12,
                     TextXAlignment=Enum.TextXAlignment.Center, LayoutOrder=9999, Parent=tpList })
+                tpEmptyLabel:SetAttribute("_langKey", "lbl_no_other_players")
+                tpEmptyLabel.Text = T("lbl_no_other_players")
+                table.insert(textRegistry, tpEmptyLabel)
             end
         else
             if tpEmptyLabel then tpEmptyLabel:Destroy() tpEmptyLabel = nil end
         end
     end
-
     scheduleHeartbeat(refreshTP, 0.15, "refreshTP")
     task.delay(0.2, function() if not isShuttingDown then pcall(refreshTP) end end)
     track(Players.PlayerRemoving:Connect(function(plr) lastKnownPos[plr.UserId] = nil end))
@@ -2298,7 +2410,7 @@ end
 -- ═══════════════════════════════════════════════════════════
 --   ФАРМ
 -- ═══════════════════════════════════════════════════════════
-makeSection(pageFarm, "Автоматический фарм", "⚔")
+makeSection(pageFarm, "sec_autofarm", "⚔")
 do
     local farmStartPos, farmRunning = nil, false
     local farmCharConn = nil
@@ -2309,12 +2421,9 @@ do
         farmCharConn = track(LocalPlayer.CharacterAdded:Connect(function()
             task.wait(0.8)
             local c = LocalPlayer.Character
-            if c then
-                local h = c:FindFirstChild("HumanoidRootPart")
-                if h then farmStartPos = h.Position end
-            end
+            if c then local h = c:FindFirstChild("HumanoidRootPart") if h then farmStartPos = h.Position end end
         end))
-        showToast("Auto-Farm запущен", C.success, "⚔")
+        showToast(T("toast_autofarm_on"), C.success, "⚔")
         task.spawn(function()
             task.wait(1)
             if not farmRunning then return end
@@ -2354,46 +2463,23 @@ do
         local wasRunning = farmRunning
         farmRunning = false Config.AutoFarm = false
         if farmCharConn then pcall(function() farmCharConn:Disconnect() end) farmCharConn = nil end
-        if wasRunning then
-            showToast("Auto-Farm остановлен", C.warn, "⚔")
-        end
+        if wasRunning then showToast(T("toast_autofarm_off"), C.warn, "⚔") end
     end
-    createToggle(pageFarm, "Авто-фарм мобов", false, function(s)
+    createToggle(pageFarm, "tog_autofarm", false, function(s)
         Config.AutoFarm = s
         if s then startFarm() else stopFarm() end
-    end, "AutoFarm", "Телепорт к мобу + удар ЛКМ + возврат")
-    createToggle(pageFarm, "Возврат на старт", true, function(s)
+    end, "AutoFarm", "desc_autofarm")
+    createToggle(pageFarm, "tog_return", true, function(s)
         Config.AutoFarmReturn = s
-        showToast(s and "Возврат: ON" or "Возврат: OFF", s and C.success or C.warn, "🔁")
+        showToast(s and T("toast_return_on") or T("toast_return_off"), s and C.success or C.warn, "🔁")
     end, "AutoFarmReturn")
-    createSlider(pageFarm, "ЗАДЕРЖКА УДАРА (0.1с – 3.0с)", 1, 30, 8, C.accent, function(v) Config.AutoFarmDelay = v/10 end, "AutoFarmDelay")
-    -- ★ Форматирование значения AutoFarmDelay в секунды
-    task.defer(function()
-        if allSliders["AutoFarmDelay"] then
-            local origSet = allSliders["AutoFarmDelay"].setValue
-            -- находим valueLabel внутри карточки AutoFarmDelay
-            local valueLbl = nil
-            for _, d in ipairs(pageFarm:GetDescendants()) do
-                if d:IsA("TextLabel") and d.Text == tostring(allSliders["AutoFarmDelay"].getValue()) then
-                    valueLbl = d
-                end
-            end
-            if valueLbl then
-                local cur = allSliders["AutoFarmDelay"].getValue()
-                valueLbl.Text = string.format("%.1fс", cur / 10)
-                allSliders["AutoFarmDelay"].setValue = function(v)
-                    origSet(v)
-                    valueLbl.Text = string.format("%.1fс", v / 10)
-                end
-            end
-        end
-    end)
+    createSlider(pageFarm, "lbl_hit_delay", 1, 30, 8, C.accent, function(v) Config.AutoFarmDelay = v/10 end, "AutoFarmDelay")
 end
 
 -- ═══════════════════════════════════════════════════════════
 --   HITBOX
 -- ═══════════════════════════════════════════════════════════
-makeSection(pageHitbox, "Хитбокс мобов", "👊")
+makeSection(pageHitbox, "sec_mob_hitbox", "👊")
 do
     local hitboxOriginals, hitboxTaskId = {}, nil
     local function findBaseParts(mob)
@@ -2443,25 +2529,21 @@ do
             hitboxTaskId = scheduleHeartbeat(function()
                 if Config.HitboxEnabled and not isShuttingDown then expandHitbox() end
             end, 0.1, "hitbox")
-            showToast("Hitbox: ON ("..Config.HitboxSize..")", C.gold, "👊")
+            showToast(string.format(T("toast_hitbox_on"), Config.HitboxSize), C.gold, "👊")
         else
             restoreHitboxes()
-            showToast("Hitbox: OFF", C.warn, "👊")
+            showToast(T("toast_hitbox_off"), C.warn, "👊")
         end
     end
-    createToggle(pageHitbox, "Расширить хитбокс", false, toggleHitbox, "HitboxEnabled", "Увеличивает зону попадания мобов")
-    createSlider(pageHitbox, "РАЗМЕР ХИТБОКСА", 1, 60, 15, C.gold, function(v)
+    createToggle(pageHitbox, "tog_hitbox", false, toggleHitbox, "HitboxEnabled", "desc_hitbox")
+    createSlider(pageHitbox, "lbl_hitbox_size", 1, 60, 15, C.gold, function(v)
         Config.HitboxSize = math.max(1, v)
         if Config.HitboxEnabled then expandHitbox() end
     end, "HitboxSize")
-    createButton(pageHitbox, "Восстановить хитбоксы", C.warn, function()
-        -- ★ Патч: fireCallback=true для синхронизации UI
-        if toggleRegistry["HitboxEnabled"] then
-            toggleRegistry["HitboxEnabled"].setState(false, true)
-        else
-            restoreHitboxes()
-        end
-        showToast("Хитбоксы восстановлены", C.success, "✓")
+    createButton(pageHitbox, "btn_restore_hitboxes", C.warn, function()
+        if toggleRegistry["HitboxEnabled"] then toggleRegistry["HitboxEnabled"].setState(false, true)
+        else restoreHitboxes() end
+        showToast(T("toast_hitbox_restored"), C.success, "✓")
     end, "🔄")
 end
 
@@ -2474,7 +2556,6 @@ do
     local espTaskId = nil
     local playerESP = { highlights = {}, billboards = {} }
     local playerESPTaskId = nil
-
     local function createESP(mob)
         if not mob or espHighlights[mob] or mob == LocalPlayer.Character then return end
         local hl = Instance.new("Highlight")
@@ -2507,13 +2588,9 @@ do
         local parts = {data.displayName or mob.Name}
         if data.isBoss then parts[1] = "💀 "..parts[1] end
         if Config.ESPShowHP then
-            if data.hp and data.maxHp then
-                parts[#parts+1] = formatNumber(data.hp).."/"..formatNumber(data.maxHp)
-            elseif data.hpText and data.maxHpText then
-                parts[#parts+1] = data.hpText.."/"..data.maxHpText
-            else
-                parts[#parts+1] = "HP ?"
-            end
+            if data.hp and data.maxHp then parts[#parts+1] = formatNumber(data.hp).."/"..formatNumber(data.maxHp)
+            elseif data.hpText and data.maxHpText then parts[#parts+1] = data.hpText.."/"..data.maxHpText
+            else parts[#parts+1] = "HP ?" end
         end
         if Config.ESPShowDist then parts[#parts+1] = dist.."m" end
         local newText = table.concat(parts, "  ·  ")
@@ -2550,24 +2627,20 @@ do
         espBillboards = {}
         if Config.ESPEnabled then task.defer(updateESP) end
     end
-
-    makeSection(pageVisual, "ESP мобов", "👁")
-    createToggle(pageVisual, "ESP мобов", false, function(state)
+    makeSection(pageVisual, "sec_mob_esp", "👁")
+    createToggle(pageVisual, "tog_mob_esp", false, function(state)
         Config.ESPEnabled = state
         if state then
-            if not espTaskId then
-                espTaskId = scheduleHeartbeat(updateESP, 0.08, "espUpdate")
-            end
-            showToast("ESP мобов: ON", C.success, "👁")
+            if not espTaskId then espTaskId = scheduleHeartbeat(updateESP, 0.08, "espUpdate") end
+            showToast(T("toast_esp_mobs_on"), C.success, "👁")
         else
             if espTaskId then unscheduleHeartbeat(espTaskId) espTaskId = nil end
             removeAllESP()
-            showToast("ESP мобов: OFF", C.warn, "👁")
+            showToast(T("toast_esp_mobs_off"), C.warn, "👁")
         end
-    end, "ESPEnabled", "Подсветка мобов сквозь стены")
-    createToggle(pageVisual, "HP мобов", true, function(s) Config.ESPShowHP = s refreshBillboards() end, "ESPShowHP")
-    createToggle(pageVisual, "Дистанция мобов", true, function(s) Config.ESPShowDist = s refreshBillboards() end, "ESPShowDist")
-
+    end, "ESPEnabled", "desc_mob_esp")
+    createToggle(pageVisual, "tog_mob_hp", true, function(s) Config.ESPShowHP = s refreshBillboards() end, "ESPShowHP")
+    createToggle(pageVisual, "tog_mob_dist", true, function(s) Config.ESPShowDist = s refreshBillboards() end, "ESPShowDist")
     local function createPlayerESP(char)
         if not char or playerESP.highlights[char] or char == LocalPlayer.Character then return end
         local hl = Instance.new("Highlight")
@@ -2638,51 +2711,39 @@ do
     local function removeAllPlayerESP()
         for _, hl in pairs(playerESP.highlights) do if hl and hl.Parent then hl:Destroy() end end
         for _, d in pairs(playerESP.billboards) do if d.gui and d.gui.Parent then d.gui:Destroy() end end
-        playerESP.highlights = {}
-        playerESP.billboards = {}
+        playerESP.highlights = {} playerESP.billboards = {}
     end
     local function refreshPlayerBillboards()
         for _, d in pairs(playerESP.billboards) do if d.gui and d.gui.Parent then d.gui:Destroy() end end
         playerESP.billboards = {}
         if Config.ESPPlayers then task.defer(updatePlayerESP) end
     end
-
-    makeSection(pageVisual, "ESP игроков", "🧑")
-    createToggle(pageVisual, "ESP игроков", false, function(state)
+    makeSection(pageVisual, "sec_player_esp", "🧑")
+    createToggle(pageVisual, "tog_player_esp", false, function(state)
         Config.ESPPlayers = state
         if state then
-            if not playerESPTaskId then
-                playerESPTaskId = scheduleHeartbeat(updatePlayerESP, 0.1, "espPlayers")
-            end
+            if not playerESPTaskId then playerESPTaskId = scheduleHeartbeat(updatePlayerESP, 0.1, "espPlayers") end
             task.defer(function() if not isShuttingDown then pcall(updatePlayerESP) end end)
-            showToast("ESP игроков: ON", C.success, "🧑")
+            showToast(T("toast_esp_plr_on"), C.success, "🧑")
         else
             if playerESPTaskId then unscheduleHeartbeat(playerESPTaskId) playerESPTaskId = nil end
             removeAllPlayerESP()
-            showToast("ESP игроков: OFF", C.warn, "🧑")
+            showToast(T("toast_esp_plr_off"), C.warn, "🧑")
         end
-    end, "ESPPlayers", "Подсветка игроков сквозь стены")
-    createToggle(pageVisual, "HP игроков", true, function(s)
-        Config.ESPPlayersShowHP = s
-        refreshPlayerBillboards()
-    end, "ESPPlayersShowHP", "Показывать здоровье игрока в ESP")
-    createToggle(pageVisual, "Дистанция игроков", true, function(s)
-        Config.ESPPlayersShowDist = s
-        refreshPlayerBillboards()
-    end, "ESPPlayersShowDist", "Показывать расстояние до игрока")
-
-    makeSection(pageVisual, "Цвет ESP", "🎨")
+    end, "ESPPlayers", "desc_player_esp")
+    createToggle(pageVisual, "tog_player_hp", true, function(s)
+        Config.ESPPlayersShowHP = s refreshPlayerBillboards()
+    end, "ESPPlayersShowHP", "desc_player_hp")
+    createToggle(pageVisual, "tog_player_dist", true, function(s)
+        Config.ESPPlayersShowDist = s refreshPlayerBillboards()
+    end, "ESPPlayersShowDist", "desc_player_dist")
+    makeSection(pageVisual, "sec_esp_color", "🎨")
     local ESP_PRESETS = {
-        {name="Red", color=Color3.fromRGB(255,60,60)},
-        {name="Orange", color=Color3.fromRGB(255,150,50)},
-        {name="Yellow", color=Color3.fromRGB(255,220,60)},
-        {name="Green", color=Color3.fromRGB(80,220,100)},
-        {name="Cyan", color=Color3.fromRGB(60,220,220)},
-        {name="Blue", color=Color3.fromRGB(70,140,255)},
-        {name="Purple", color=Color3.fromRGB(170,110,255)},
-        {name="Pink", color=Color3.fromRGB(255,110,190)},
-        {name="White", color=Color3.fromRGB(255,255,255)},
-        {name="Black", color=Color3.fromRGB(30,30,30)},
+        {name="Red", color=Color3.fromRGB(255,60,60)}, {name="Orange", color=Color3.fromRGB(255,150,50)},
+        {name="Yellow", color=Color3.fromRGB(255,220,60)}, {name="Green", color=Color3.fromRGB(80,220,100)},
+        {name="Cyan", color=Color3.fromRGB(60,220,220)}, {name="Blue", color=Color3.fromRGB(70,140,255)},
+        {name="Purple", color=Color3.fromRGB(170,110,255)}, {name="Pink", color=Color3.fromRGB(255,110,190)},
+        {name="White", color=Color3.fromRGB(255,255,255)}, {name="Black", color=Color3.fromRGB(30,30,30)},
     }
     local espColorGrid = new("Frame", { Size=UDim2.new(1,-8,0,68), BackgroundTransparency=1, Parent=pageVisual })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8),
@@ -2691,13 +2752,9 @@ do
     setESPColor = function(color)
         Config.ESPColor = color
         for _, hl in pairs(espHighlights) do if hl and hl.Parent then hl.FillColor = color end end
-        for _, data in pairs(espBillboards) do
-            if data.label and data.label.Parent then data.label.TextColor3 = color end
-        end
+        for _, data in pairs(espBillboards) do if data.label and data.label.Parent then data.label.TextColor3 = color end end
         for _, hl in pairs(playerESP.highlights) do if hl and hl.Parent then hl.FillColor = color end end
-        for _, data in pairs(playerESP.billboards) do
-            if data.label and data.label.Parent then data.label.TextColor3 = color end
-        end
+        for _, data in pairs(playerESP.billboards) do if data.label and data.label.Parent then data.label.TextColor3 = color end end
         for _, btn in ipairs(espColorButtons) do
             local isCurrent = btn.color == color
             btn.inst.BackgroundColor3 = btn.color
@@ -2718,7 +2775,7 @@ do
         table.insert(espColorButtons, {inst=btn, color=preset.color, stroke=s})
         btn.MouseButton1Click:Connect(function()
             setESPColor(preset.color)
-            showToast("Цвет ESP: "..preset.name, preset.color, "🎨")
+            showToast(string.format(T("toast_esp_color"), preset.name), preset.color, "🎨")
         end)
         btn.MouseEnter:Connect(function()
             TweenService:Create(btn, TweenInfo.new(DS.A.fast), { Size=UDim2.new(0,38,0,38) }):Play()
@@ -2730,7 +2787,7 @@ do
     task.defer(function() setESPColor(Config.ESPColor) end)
 end
 
-makeSection(pageVisual, "Освещение и камера", "🎨")
+makeSection(pageVisual, "sec_lighting", "🎨")
 local originalLighting, originalZoom
 do
     local function toggleFullbright(state)
@@ -2742,7 +2799,7 @@ do
             Lighting.Brightness=3 Lighting.Ambient=Color3.fromRGB(255,255,255)
             Lighting.OutdoorAmbient=Color3.fromRGB(255,255,255)
             Lighting.ClockTime=12 Lighting.GlobalShadows=false
-            showToast("Fullbright: ON", C.success, "🌞")
+            showToast(T("toast_fullbright_on"), C.success, "🌞")
         elseif originalLighting then
             pcall(function()
                 Lighting.Brightness=originalLighting.Brightness Lighting.Ambient=originalLighting.Ambient
@@ -2750,11 +2807,10 @@ do
                 Lighting.GlobalShadows=originalLighting.GlobalShadows
             end)
             originalLighting = nil
-            showToast("Fullbright: OFF", C.warn, "🌞")
+            showToast(T("toast_fullbright_off"), C.warn, "🌞")
         end
     end
-    createToggle(pageVisual, "Fullbright", false, toggleFullbright, "Fullbright", "Убирает тени")
-
+    createToggle(pageVisual, "tog_fullbright", false, toggleFullbright, "Fullbright", "desc_fullbright")
     local fogOriginals, createdAtm = nil, nil
     local function toggleNoFog(state)
         Config.NoFog = state
@@ -2785,7 +2841,7 @@ do
                 elseif ch:IsA("SunRaysEffect") then ch.Intensity=0
                 elseif ch:IsA("DepthOfFieldEffect") then ch.FarIntensity=0 ch.NearIntensity=0 ch.InFocusRadius=0 end
             end
-            showToast("Туман убран", C.success, "🌫")
+            showToast(T("toast_fog_off"), C.success, "🌫")
         elseif fogOriginals then
             pcall(function()
                 Lighting.FogEnd=fogOriginals.FogEnd Lighting.FogStart=fogOriginals.FogStart Lighting.FogColor=fogOriginals.FogColor
@@ -2798,28 +2854,27 @@ do
             end
             if createdAtm then pcall(function() createdAtm:Destroy() end) createdAtm = nil end
             fogOriginals = nil
-            showToast("Туман восстановлен", C.warn, "🌫")
+            showToast(T("toast_fog_on"), C.warn, "🌫")
         end
     end
-    createToggle(pageVisual, "Убрать туман", false, toggleNoFog, "NoFog")
-
+    createToggle(pageVisual, "tog_nofog", false, toggleNoFog, "NoFog")
     local function toggleZoom(state)
         Config.ZoomEnabled = state
         if state then
             if not originalZoom then originalZoom = LocalPlayer.CameraMaxZoomDistance end
             LocalPlayer.CameraMaxZoomDistance = Config.ZoomValue
             LocalPlayer.CameraMinZoomDistance = Config.ZoomValue / 2
-            showToast("Камера: "..Config.ZoomValue, C.success, "🔍")
+            showToast(string.format(T("toast_cam_on"), Config.ZoomValue), C.success, "🔍")
         else
             pcall(function()
                 LocalPlayer.CameraMaxZoomDistance = originalZoom or 128
                 LocalPlayer.CameraMinZoomDistance = 0.5
             end)
-            showToast("Камера: OFF", C.warn, "🔍")
+            showToast(T("toast_cam_off"), C.warn, "🔍")
         end
     end
-    createToggle(pageVisual, "Отдаление камеры", false, toggleZoom, "ZoomEnabled")
-    createSlider(pageVisual, "ДАЛЬНОСТЬ КАМЕРЫ", 50, 2000, 500, C.accent2, function(v)
+    createToggle(pageVisual, "tog_zoom", false, toggleZoom, "ZoomEnabled")
+    createSlider(pageVisual, "lbl_zoom_value", 50, 2000, 500, C.accent2, function(v)
         Config.ZoomValue = v
         if Config.ZoomEnabled then
             pcall(function() LocalPlayer.CameraMaxZoomDistance = v LocalPlayer.CameraMinZoomDistance = v/2 end)
@@ -2837,19 +2892,20 @@ do
     local trackerListRef = nil
     local updateTracker
     local trackerRowMap = {}
-
-    local function makeMiniSection(parent, text, icon)
+    local function makeMiniSection(parent, textKey, icon)
         local row = new("Frame", { Size=UDim2.new(1,-8,0,18), BackgroundTransparency=1, Parent=parent })
         local accent = new("Frame", { Size=UDim2.new(0,3,0,11), Position=UDim2.new(0,0,0.5,-5.5),
             BackgroundColor3=C.accent, BackgroundTransparency=0.3, BorderSizePixel=0, Parent=row })
         corner(accent, DS.R.round)
-        new("TextLabel", { Size=UDim2.new(1,-10,1,0), Position=UDim2.new(0,10,0,0), BackgroundTransparency=1,
-            Text=(icon and (icon.." ") or "")..string.upper(text),
+        local lbl = new("TextLabel", { Size=UDim2.new(1,-10,1,0), Position=UDim2.new(0,10,0,0), BackgroundTransparency=1,
+            Text=(icon and (icon.." ") or "")..string.upper(T(textKey)),
             TextColor3=C.textMuted, Font=DS.F.bold, TextSize=9,
             TextXAlignment=Enum.TextXAlignment.Left, Parent=row })
+        lbl:SetAttribute("_langSectionKey", textKey)
+        lbl:SetAttribute("_langSectionIcon", icon or "")
+        table.insert(textRegistry, lbl)
     end
-
-    createToggle(pageTracker, "Включить Mob Tracker", false, function(state)
+    createToggle(pageTracker, "tog_tracker", false, function(state)
         Config.MobTracker = state
         if trackerListRef then trackerListRef.Visible = state end
         if state then
@@ -2862,7 +2918,7 @@ do
                 end
             end))
             task.defer(function() if not isShuttingDown then pcall(updateTracker) end end)
-            showToast("Mob Tracker: ON", C.success, "📊")
+            showToast(T("toast_tracker_on"), C.success, "📊")
         else
             if trackerConn then pcall(function() trackerConn:Disconnect() end) trackerConn = nil end
             if trackerListRef then
@@ -2874,15 +2930,13 @@ do
             if statsRef.mobs then statsRef.mobs.Text = "0" end
             if statsRef.hp then statsRef.hp.Text = "0" end
             if statsRef.nearest then statsRef.nearest.Text = "—" end
-            showToast("Mob Tracker: OFF", C.warn, "📊")
+            showToast(T("toast_tracker_off"), C.warn, "📊")
         end
-    end, "MobTracker", "Показывает всех мобов рядом")
-
-    makeMiniSection(pageTracker, "Статистика", "📈")
+    end, "MobTracker", "desc_tracker")
+    makeMiniSection(pageTracker, "sec_stats_tracker", "📈")
     local statsRow = new("Frame", { Size=UDim2.new(1,-8,0,72), BackgroundTransparency=1, Parent=pageTracker })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=statsRow })
-
-    local function createStatCard(label, icon, color, order)
+    local function createStatCard(labelKey, icon, color, order)
         local card = new("Frame", { Size=UDim2.new(0.333,-6,1,0), BackgroundColor3=C.card, BorderSizePixel=0, LayoutOrder=order, Parent=statsRow })
         corner(card, DS.R.card)
         stroke(card, C.border, 1, 0.5)
@@ -2892,37 +2946,36 @@ do
         stroke(badge, color, 1, 0.4)
         new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1, Text=icon,
             TextColor3=color, Font=DS.F.bold, TextSize=11, Parent=badge })
-        new("TextLabel", { Size=UDim2.new(1,-40,0,14), Position=UDim2.new(0,38,0,13),
-            BackgroundTransparency=1, Text=string.upper(label),
-            TextColor3=C.textMuted, Font=DS.F.bold, TextSize=9,
-            TextXAlignment=Enum.TextXAlignment.Left, Parent=card })
+        regLang(new("TextLabel", { Size=UDim2.new(1,-40,0,14), Position=UDim2.new(0,38,0,13),
+            BackgroundTransparency=1, TextColor3=C.textMuted,
+            Font=DS.F.bold, TextSize=9,
+            TextXAlignment=Enum.TextXAlignment.Left, Parent=card }), labelKey)
         return new("TextLabel", { Size=UDim2.new(1,-16,0,26), Position=UDim2.new(0,10,0,36),
             BackgroundTransparency=1, Text="0", TextColor3=color,
             Font=DS.F.title, TextSize=21, TextXAlignment=Enum.TextXAlignment.Left, Parent=card })
     end
-    statsRef.mobs = createStatCard("МОБОВ", "👾", C.accent, 1)
-    statsRef.hp = createStatCard("СУММА HP", "❤", C.success, 2)
-    statsRef.nearest = createStatCard("БЛИЖАЙШИЙ", "🎯", C.gold, 3)
-
+    statsRef.mobs = createStatCard("stat_mobs", "👾", C.accent, 1)
+    statsRef.hp = createStatCard("stat_hp", "❤", C.success, 2)
+    statsRef.nearest = createStatCard("stat_nearest", "🎯", C.gold, 3)
     local sortBar = new("Frame", { Size=UDim2.new(1,-8,0,38), BackgroundColor3=C.card, BorderSizePixel=0, Parent=pageTracker })
     corner(sortBar, DS.R.card)
     stroke(sortBar, C.border, 1, 0.5)
-    new("TextLabel", { Size=UDim2.new(0,60,1,0), Position=UDim2.new(0,16,0,0), BackgroundTransparency=1,
-        Text="СОРТ", TextColor3=C.textMuted, Font=DS.F.bold, TextSize=9,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=sortBar })
+    regLang(new("TextLabel", { Size=UDim2.new(0,60,1,0), Position=UDim2.new(0,16,0,0), BackgroundTransparency=1,
+        TextColor3=C.textMuted, Font=DS.F.bold, TextSize=9,
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=sortBar }), "lbl_sort")
     local sortLayout = new("Frame", { Size=UDim2.new(1,-80,1,0), Position=UDim2.new(0,66,0,0), BackgroundTransparency=1, Parent=sortBar })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,6), VerticalAlignment=Enum.VerticalAlignment.Center, SortOrder=Enum.SortOrder.LayoutOrder, Parent=sortLayout })
-
     local sortModes = {
-        {name="Distance", label="Дист"}, {name="Boss", label="💀 Боссы"},
-        {name="HP", label="HP"}, {name="Name", label="Имя"},
+        {name="Distance", key="sort_dist"}, {name="Boss", key="sort_boss"},
+        {name="HP", key="sort_hp"}, {name="Name", key="sort_name"},
     }
     local sortButtons = {}
     for i, mode in ipairs(sortModes) do
         local sb = new("TextButton", { Size=UDim2.new(0,0,0,26), AutomaticSize=Enum.AutomaticSize.X,
             BackgroundColor3=(i==1) and C.accent or C.bgAlt, BackgroundTransparency=(i==1) and 0 or 0.3,
-            Text=mode.label, TextColor3=C.text, Font=DS.F.body, TextSize=11,
+            TextColor3=C.text, Font=DS.F.body, TextSize=11,
             BorderSizePixel=0, AutoButtonColor=false, LayoutOrder=i, Parent=sortLayout })
+        regLang(sb, mode.key)
         corner(sb, DS.R.chip)
         new("UIPadding", { PaddingLeft=UDim.new(0,12), PaddingRight=UDim.new(0,12), Parent=sb })
         sortButtons[mode.name] = sb
@@ -2939,7 +2992,6 @@ do
             task.defer(function() if not isShuttingDown then pcall(updateTracker) end end)
         end)
     end
-
     local trackerList = new("ScrollingFrame", {
         Size=UDim2.new(1,-8,0,200), BackgroundColor3=C.card, BorderSizePixel=0,
         ScrollBarThickness=5, ScrollBarImageColor3=C.accent, ScrollBarImageTransparency=0.4,
@@ -2950,13 +3002,11 @@ do
     new("UIListLayout", { Padding=UDim.new(0,5), Parent=trackerList })
     new("UIPadding", { PaddingTop=UDim.new(0,8), PaddingBottom=UDim.new(0,8), PaddingLeft=UDim.new(0,8), PaddingRight=UDim.new(0,8), Parent=trackerList })
     trackerListRef = trackerList
-
     updateTracker = function()
         if not Config.MobTracker or isShuttingDown then return end
         local char = LocalPlayer.Character
         local myHrp = char and char:FindFirstChild("HumanoidRootPart")
         if not myHrp then return end
-
         local mobs = {}
         for _, data in ipairs(getAllMobs()) do
             table.insert(mobs, {
@@ -2969,7 +3019,6 @@ do
                 isBoss = data.isBoss,
             })
         end
-
         if currentSortMode == "Distance" then
             table.sort(mobs, function(a,b) if a.dist~=b.dist then return a.dist<b.dist end return a.name<b.name end)
         elseif currentSortMode == "Boss" then
@@ -2983,7 +3032,6 @@ do
         elseif currentSortMode == "Name" then
             table.sort(mobs, function(a,b) return string.lower(a.name)<string.lower(b.name) end)
         end
-
         local totalHP, nearestDist = 0, math.huge
         for _, m in ipairs(mobs) do
             totalHP = totalHP + (m.hp or 0)
@@ -2992,41 +3040,33 @@ do
         if statsRef.mobs then statsRef.mobs.Text = tostring(#mobs) end
         if statsRef.hp then statsRef.hp.Text = formatNumber(totalHP) end
         if statsRef.nearest then statsRef.nearest.Text = (nearestDist~=math.huge) and (nearestDist.."m") or "—" end
-
         local renderCount = math.min(#mobs, 60)
         local visible = {}
-        for i = 1, renderCount do
-            if mobs[i].model then visible[mobs[i].model] = i end
-        end
-
+        for i = 1, renderCount do if mobs[i].model then visible[mobs[i].model] = i end end
         for model, cached in pairs(trackerRowMap) do
             if model ~= "__empty" and not visible[model] then
                 cached.row:Destroy()
                 trackerRowMap[model] = nil
             end
         end
-
         if renderCount == 0 then
             if not trackerRowMap.__empty then
                 local lbl = new("TextLabel", {
                     Size=UDim2.new(1,0,0,44), BackgroundTransparency=1,
-                    Text="Мобов рядом нет", TextColor3=C.textMuted,
-                    Font=DS.F.subtle, TextSize=12,
+                    TextColor3=C.textMuted, Font=DS.F.subtle, TextSize=12,
                     TextXAlignment=Enum.TextXAlignment.Center,
                     LayoutOrder=1, Parent=trackerList })
+                lbl:SetAttribute("_langKey", "lbl_no_mobs")
+                lbl.Text = T("lbl_no_mobs")
+                table.insert(textRegistry, lbl)
                 trackerRowMap.__empty = {row=lbl}
             end
             return
         end
-        if trackerRowMap.__empty then
-            trackerRowMap.__empty.row:Destroy()
-            trackerRowMap.__empty = nil
-        end
-
+        if trackerRowMap.__empty then trackerRowMap.__empty.row:Destroy() trackerRowMap.__empty = nil end
         for i = 1, renderCount do
             local m = mobs[i]
             local cached = trackerRowMap[m.model]
-
             if not cached then
                 local rowBg = m.isBoss and Color3.fromRGB(45,35,20) or C.bgAlt
                 local row = new("TextButton", {
@@ -3067,7 +3107,7 @@ do
                     local cur = trackerRowMap[m.model]
                     if cur and cur.mob and cur.mob.hrp then
                         teleportTo(cur.mob.hrp.Position + Vector3.new(0,3,2))
-                        showToast("К "..cur.mob.name, cur.isBoss and C.gold or C.accent, cur.isBoss and "💀" or "→")
+                        showToast(string.format(T("toast_to_mob"), cur.mob.name), cur.isBoss and C.gold or C.accent, cur.isBoss and "💀" or "→")
                     end
                 end)
                 row.MouseEnter:Connect(function()
@@ -3081,19 +3121,14 @@ do
                     TweenService:Create(row, TweenInfo.new(DS.A.fast), { BackgroundColor3=bg }):Play()
                 end)
             end
-
             cached.mob = m
             if cached.row.LayoutOrder ~= i then cached.row.LayoutOrder = i end
             if cached.nameLbl.Text ~= m.name then cached.nameLbl.Text = m.name end
             if cached.distLbl.Text ~= m.dist.."m" then cached.distLbl.Text = m.dist.."m" end
             local hpText
-            if m.hp then
-                hpText = formatNumber(m.hp).." / "..formatNumber(m.maxHp or m.hp).." HP"
-            elseif m.hpText and m.maxHpText then
-                hpText = m.hpText.." / "..m.maxHpText.." HP"
-            else
-                hpText = "HP: ?"
-            end
+            if m.hp then hpText = formatNumber(m.hp).." / "..formatNumber(m.maxHp or m.hp).." HP"
+            elseif m.hpText and m.maxHpText then hpText = m.hpText.." / "..m.maxHpText.." HP"
+            else hpText = "HP: ?" end
             if cached.hpLbl.Text ~= hpText then cached.hpLbl.Text = hpText end
         end
     end
@@ -3102,13 +3137,13 @@ end
 -- ═══════════════════════════════════════════════════════════
 --   UTILS
 -- ═══════════════════════════════════════════════════════════
-makeSection(pageUtility, "Кликер", "🖱")
+makeSection(pageUtility, "sec_clicker", "🖱")
 do
     local clickerRunning = false
     local function startClicker()
         if clickerRunning then return end
         clickerRunning = true
-        showToast("Auto-Clicker запущен", C.gold, "🖱")
+        showToast(T("toast_clicker_on"), C.gold, "🖱")
         task.spawn(function()
             task.wait(1)
             if not clickerRunning then return end
@@ -3123,24 +3158,24 @@ do
         if not clickerRunning then return end
         clickerRunning = false
         Config.AutoClicker = false
-        showToast("Auto-Clicker остановлен", C.warn, "🖱")
+        showToast(T("toast_clicker_off"), C.warn, "🖱")
     end
-    createToggle(pageUtility, "Auto-Clicker", false, function(s)
+    createToggle(pageUtility, "tog_clicker", false, function(s)
         Config.AutoClicker = s
         if s then startClicker() else stopClicker() end
-    end, "AutoClicker", "Автоматические клики ЛКМ")
-    createSlider(pageUtility, "КЛИКОВ В СЕКУНДУ", 1, 50, 10, C.gold, function(v) Config.AutoClickerCPS = v end, "AutoClickerCPS")
+    end, "AutoClicker", "desc_clicker")
+    createSlider(pageUtility, "lbl_cps", 1, 50, 10, C.gold, function(v) Config.AutoClickerCPS = v end, "AutoClickerCPS")
 end
 
-makeSection(pageUtility, "Друзья", "👥")
-createToggle(pageUtility, "Уведомления о друзьях", true, function(s)
+makeSection(pageUtility, "sec_friends", "👥")
+createToggle(pageUtility, "tog_friend_notify", true, function(s)
     Config.NotifyFriends = s
-    showToast(s and "Уведомления о друзьях: ON" or "Уведомления о друзьях: OFF",
+    showToast(s and T("toast_friend_notify_on") or T("toast_friend_notify_off"),
         s and C.success or C.warn, "👥")
-end, "NotifyFriends", "Сообщение в чат при входе/выходе друга")
+end, "NotifyFriends", "desc_friend_notify")
 
 -- ═══════════════════════════════════════════════════════════
---   STATS TAB (v27.22)
+--   STATS TAB
 -- ═══════════════════════════════════════════════════════════
 do
     local lastMobSnapshot = {}
@@ -3149,19 +3184,14 @@ do
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         local myPos = hrp and hrp.Position
         local current = {}
-        for _, data in ipairs(getAllMobs()) do
-            current[data.model] = {pos = data.hrp.Position, hp = data.hp}
-        end
+        for _, data in ipairs(getAllMobs()) do current[data.model] = {pos = data.hrp.Position, hp = data.hp} end
         for model, info in pairs(lastMobSnapshot) do
             if not current[model] and myPos then
-                if (info.pos - myPos).Magnitude <= 500 then
-                    KillCounter = KillCounter + 1
-                end
+                if (info.pos - myPos).Magnitude <= 500 then KillCounter = KillCounter + 1 end
             end
         end
         lastMobSnapshot = current
     end, 0.5, "killCounter")
-
     local function formatDuration(sec)
         sec = math.floor(sec)
         local h = math.floor(sec / 3600)
@@ -3171,43 +3201,27 @@ do
         if m > 0 then return string.format("%dm %ds", m, s) end
         return string.format("%ds", s)
     end
-
-    -- ─── SP reader (на руках) ───
     local SP_CURRENT_PATTERNS = {
-        "^Skill Points:%s*([%d%.]+%a*)",
-        "^SkillPoints:%s*([%d%.]+%a*)",
-        "^Skill Points%s+([%d%.]+%a*)",
-        "^SP Earned:%s*([%d%.]+%a*)",
-        "^SP:%s*([%d%.]+%a*)",
+        "^Skill Points:%s*([%d%.]+%a*)", "^SkillPoints:%s*([%d%.]+%a*)",
+        "^Skill Points%s+([%d%.]+%a*)", "^SP Earned:%s*([%d%.]+%a*)", "^SP:%s*([%d%.]+%a*)",
     }
     local SP_ATTRS = {"SkillPoints","SkillPointsEarned","TotalSP","TotalSpEarned","SPEarned","SpEarned","SP","Sp"}
     local SP_LS_NAMES = {"sp","skillpoints","skill points","spearned","sp earned"}
-
     local _spCurCache = { value = nil, time = 0, fresh = false }
     local _spMaxSeen = 0
-
-    -- ★ Кэш TextLabel'ов PlayerGui
     local _spLabelCache = nil
     local _spLabelCacheTime = 0
     local SP_LABEL_CACHE_TTL = 5
-
     local function refreshSPLabelCache()
         local pg = LocalPlayer:FindFirstChild("PlayerGui")
         if not pg then _spLabelCache = nil return end
         local labels = {}
-        for _, d in ipairs(pg:GetDescendants()) do
-            if d:IsA("TextLabel") then
-                table.insert(labels, d)
-            end
-        end
+        for _, d in ipairs(pg:GetDescendants()) do if d:IsA("TextLabel") then table.insert(labels, d) end end
         _spLabelCache = labels
         _spLabelCacheTime = tick()
     end
-
     local function scanPlayerGui(patterns)
-        if not _spLabelCache or tick() - _spLabelCacheTime > SP_LABEL_CACHE_TTL then
-            refreshSPLabelCache()
-        end
+        if not _spLabelCache or tick() - _spLabelCacheTime > SP_LABEL_CACHE_TTL then refreshSPLabelCache() end
         if not _spLabelCache then return nil end
         for _, d in ipairs(_spLabelCache) do
             if d and d.Parent then
@@ -3225,7 +3239,6 @@ do
         end
         return nil
     end
-
     local function readSPCurrent()
         local now = tick()
         if _spCurCache.value ~= nil and now - _spCurCache.time < 0.5 then
@@ -3273,16 +3286,8 @@ do
         end
         return _spCurCache.value or _spMaxSeen, _spCurCache.fresh
     end
-
-    -- ─── Persistent SP stats ───
     local SP_STATS_FILE = "SPU_sp_stats.json"
-    local spStats = {
-        initialSP = nil,
-        lifetimeEarned = 0,
-        lifetimeSpent = 0,
-        firstLaunch = nil,
-    }
-
+    local spStats = { initialSP=nil, lifetimeEarned=0, lifetimeSpent=0, firstLaunch=nil }
     if FS_AVAILABLE and isfile and isfile(SP_STATS_FILE) then
         pcall(function()
             local loaded = HttpService:JSONDecode(readfile(SP_STATS_FILE))
@@ -3295,16 +3300,12 @@ do
         end)
     end
     if not spStats.firstLaunch then spStats.firstLaunch = tick() end
-
     local function saveSpStats()
         if not FS_AVAILABLE or not writefile then return end
-        pcall(function()
-            writefile(SP_STATS_FILE, HttpService:JSONEncode(spStats))
-        end)
+        pcall(function() writefile(SP_STATS_FILE, HttpService:JSONEncode(spStats)) end)
     end
     saveSpStats()
     table.insert(_shutdownHooks, saveSpStats)
-
     local function resetSpStats()
         spStats.initialSP = nil
         spStats.lifetimeEarned = 0
@@ -3313,8 +3314,7 @@ do
         _spMaxSeen = 0
         saveSpStats()
     end
-
-    local function createBigStat(parent, label, icon, color, order)
+    local function createBigStat(parent, labelKey, icon, color, order)
         local card = new("Frame", { Size=UDim2.new(0.5,-4,1,0), BackgroundColor3=C.card, BorderSizePixel=0, LayoutOrder=order, Parent=parent })
         corner(card, DS.R.card)
         stroke(card, C.border, 1, 0.5)
@@ -3324,107 +3324,86 @@ do
         stroke(badge, color, 1, 0.4)
         new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1, Text=icon,
             TextColor3=color, Font=DS.F.bold, TextSize=11, Parent=badge })
-        new("TextLabel", { Size=UDim2.new(1,-40,0,14), Position=UDim2.new(0,38,0,13),
-            BackgroundTransparency=1, Text=string.upper(label),
-            TextColor3=C.textMuted, Font=DS.F.bold, TextSize=9,
-            TextXAlignment=Enum.TextXAlignment.Left, Parent=card })
+        regLang(new("TextLabel", { Size=UDim2.new(1,-40,0,14), Position=UDim2.new(0,38,0,13),
+            BackgroundTransparency=1, TextColor3=C.textMuted,
+            Font=DS.F.bold, TextSize=9,
+            TextXAlignment=Enum.TextXAlignment.Left, Parent=card }), labelKey)
         return new("TextLabel", { Size=UDim2.new(1,-16,0,26), Position=UDim2.new(0,10,0,36),
             BackgroundTransparency=1, Text="—", TextColor3=color,
             Font=DS.F.title, TextSize=20, TextXAlignment=Enum.TextXAlignment.Left, Parent=card })
     end
-
-    makeSection(pageStats, "Сессия", "⏱")
+    makeSection(pageStats, "sec_session", "⏱")
     local statsRow1 = new("Frame", { Size=UDim2.new(1,-8,0,72), BackgroundTransparency=1, Parent=pageStats })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=statsRow1 })
-    local sessionTimeLbl = createBigStat(statsRow1, "Время сессии", "⏱", C.accent, 1)
-    local killCounterLbl = createBigStat(statsRow1, "Убийств", "💀", C.danger, 2)
-
-    makeSection(pageStats, "Валюта", "💎")
+    local sessionTimeLbl = createBigStat(statsRow1, "stat_session_time", "⏱", C.accent, 1)
+    local killCounterLbl = createBigStat(statsRow1, "stat_kills", "💀", C.danger, 2)
+    makeSection(pageStats, "sec_currency", "💎")
     local statsRowSP1 = new("Frame", { Size=UDim2.new(1,-8,0,72), BackgroundTransparency=1, Parent=pageStats })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=statsRowSP1 })
-    local spEarnedLbl = createBigStat(statsRowSP1, "SP на руках", "💎", Color3.fromRGB(150,120,255), 1)
-    local spPerMinLbl = createBigStat(statsRowSP1, "SP / мин", "⏳", Color3.fromRGB(200,170,255), 2)
-
+    local spEarnedLbl = createBigStat(statsRowSP1, "stat_sp_hand", "💎", Color3.fromRGB(150,120,255), 1)
+    local spPerMinLbl = createBigStat(statsRowSP1, "stat_sp_min", "⏳", Color3.fromRGB(200,170,255), 2)
     local statsRowSP2 = new("Frame", { Size=UDim2.new(1,-8,0,72), BackgroundTransparency=1, Parent=pageStats })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=statsRowSP2 })
-    local spSessionEarnedLbl = createBigStat(statsRowSP2, "Заработано за сессию", "📈", Color3.fromRGB(90,205,135), 1)
-    local spLifetimeSpentLbl = createBigStat(statsRowSP2, "Потрачено (всего)", "🔥", Color3.fromRGB(255,120,120), 2)
-
+    local spSessionEarnedLbl = createBigStat(statsRowSP2, "stat_sp_session", "📈", Color3.fromRGB(90,205,135), 1)
+    local spLifetimeSpentLbl = createBigStat(statsRowSP2, "stat_sp_spent", "🔥", Color3.fromRGB(255,120,120), 2)
     local statsRowSP3 = new("Frame", { Size=UDim2.new(1,-8,0,72), BackgroundTransparency=1, Parent=pageStats })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=statsRowSP3 })
-    local spLifetimeEarnedLbl = createBigStat(statsRowSP3, "Заработано (всего)", "🌟", Color3.fromRGB(120,220,255), 1)
-
-    -- Кнопки
+    local spLifetimeEarnedLbl = createBigStat(statsRowSP3, "stat_sp_earned", "🌟", Color3.fromRGB(120,220,255), 1)
     local spButtonsRow = new("Frame", { Size=UDim2.new(1,-8,0,40), BackgroundTransparency=1, Parent=pageStats })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=spButtonsRow })
-
     local setStartBtn = new("TextButton", {
         Size=UDim2.new(0.5,-4,1,0), BackgroundColor3=C.accent, Text="",
         BorderSizePixel=0, AutoButtonColor=false, LayoutOrder=1, Parent=spButtonsRow })
     corner(setStartBtn, DS.R.button)
     stroke(setStartBtn, C.accent, 1, 0.4)
-    new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
-        Text="📌 Зафиксировать старт", TextColor3=Color3.fromRGB(255,255,255),
-        Font=DS.F.bold, TextSize=12, Parent=setStartBtn })
-
+    regLang(new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
+        TextColor3=Color3.fromRGB(255,255,255),
+        Font=DS.F.bold, TextSize=12, Parent=setStartBtn }), "btn_set_start")
     local resetSpBtn = new("TextButton", {
         Size=UDim2.new(0.5,-4,1,0), BackgroundColor3=C.danger, Text="",
         BorderSizePixel=0, AutoButtonColor=false, LayoutOrder=2, Parent=spButtonsRow })
     corner(resetSpBtn, DS.R.button)
     stroke(resetSpBtn, C.danger, 1, 0.4)
-    new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
-        Text="🗑 Сбросить SP-статистику", TextColor3=Color3.fromRGB(255,255,255),
-        Font=DS.F.bold, TextSize=12, Parent=resetSpBtn })
-
-    -- ★ Информационная строка о зафиксированном старте
+    regLang(new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
+        TextColor3=Color3.fromRGB(255,255,255),
+        Font=DS.F.bold, TextSize=12, Parent=resetSpBtn }), "btn_reset_sp")
     local spStartInfoLbl = new("TextLabel", {
         Size=UDim2.new(1,-8,0,22), BackgroundTransparency=1,
         Text="", TextColor3=C.textMuted, Font=DS.F.subtle, TextSize=10,
         TextXAlignment=Enum.TextXAlignment.Left, Parent=pageStats })
-
-    makeSection(pageStats, "Локация", "📍")
+    makeSection(pageStats, "sec_location", "📍")
     local statsRow2 = new("Frame", { Size=UDim2.new(1,-8,0,72), BackgroundTransparency=1, Parent=pageStats })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=statsRow2 })
-    local zoneLbl = createBigStat(statsRow2, "Текущая зона", "🌍", C.gold, 1)
-    local posLbl = createBigStat(statsRow2, "Позиция X,Z", "🎯", C.accent2, 2)
-
-    makeSection(pageStats, "Персонаж", "🧑")
+    local zoneLbl = createBigStat(statsRow2, "stat_zone", "🌍", C.gold, 1)
+    local posLbl = createBigStat(statsRow2, "stat_pos", "🎯", C.accent2, 2)
+    makeSection(pageStats, "sec_character", "🧑")
     local statsRow3 = new("Frame", { Size=UDim2.new(1,-8,0,72), BackgroundTransparency=1, Parent=pageStats })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8), SortOrder=Enum.SortOrder.LayoutOrder, Parent=statsRow3 })
-    local hpLbl = createBigStat(statsRow3, "Здоровье", "❤", C.success, 1)
-    local speedLbl = createBigStat(statsRow3, "Скорость", "🏃", C.warn, 2)
-
-    createButton(pageStats, "Сбросить счётчик убийств", C.warn, function()
+    local hpLbl = createBigStat(statsRow3, "stat_hp", "❤", C.success, 1)
+    local speedLbl = createBigStat(statsRow3, "stat_speed", "🏃", C.warn, 2)
+    createButton(pageStats, "btn_reset_kills", C.warn, function()
         KillCounter = 0
-        showToast("Счётчик сброшен", C.warn, "🔄")
+        showToast(T("toast_reset_kills"), C.warn, "🔄")
     end, "🔄")
-
-    -- ★ SP tracking state
     local _spLastValue = nil
     local _spLastValueFresh = false
     local _spSessionEarned = 0
     local _spSessionSpent = 0
     local _spSessionStart = nil
     local _spSessionStartTime = nil
-
-    -- ★ Сброс дельт при респавне
     track(LocalPlayer.CharacterAdded:Connect(function()
         task.delay(1.5, function()
             _spLastValue = nil
             _spLastValueFresh = false
         end)
     end))
-
     setStartBtn.MouseButton1Click:Connect(function()
         local sp = readSPCurrent()
-        if not sp then
-            showToast("Не удалось прочитать SP", C.warn, "⚠")
-            return
-        end
+        if not sp then showToast(T("toast_sp_err"), C.warn, "⚠") return end
         spStats.initialSP = sp
         spStats.firstLaunch = tick()
         saveSpStats()
-        showToast("Старт зафиксирован: "..formatNumber(sp), C.success, "📌")
+        showToast(string.format(T("toast_sp_start"), formatNumber(sp)), C.success, "📌")
     end)
     setStartBtn.MouseEnter:Connect(function()
         local cur = setStartBtn.BackgroundColor3
@@ -3434,16 +3413,11 @@ do
     setStartBtn.MouseLeave:Connect(function()
         TweenService:Create(setStartBtn, TweenInfo.new(DS.A.fast), { BackgroundColor3=C.accent }):Play()
     end)
-
     resetSpBtn.MouseButton1Click:Connect(function()
         resetSpStats()
-        _spSessionEarned = 0
-        _spSessionSpent = 0
-        _spSessionStart = nil
-        _spSessionStartTime = nil
-        _spLastValue = nil
-        _spLastValueFresh = false
-        showToast("SP-статистика сброшена", C.warn, "🗑")
+        _spSessionEarned = 0 _spSessionSpent = 0 _spSessionStart = nil _spSessionStartTime = nil
+        _spLastValue = nil _spLastValueFresh = false
+        showToast(T("toast_sp_reset"), C.warn, "🗑")
     end)
     resetSpBtn.MouseEnter:Connect(function()
         local cur = resetSpBtn.BackgroundColor3
@@ -3453,31 +3427,20 @@ do
     resetSpBtn.MouseLeave:Connect(function()
         TweenService:Create(resetSpBtn, TweenInfo.new(DS.A.fast), { BackgroundColor3=C.danger }):Play()
     end)
-
     local _lastSaveTime = 0
     local function saveSpStatsThrottled()
         local now = tick()
-        if now - _lastSaveTime > 3 then
-            _lastSaveTime = now
-            saveSpStats()
-        end
+        if now - _lastSaveTime > 3 then _lastSaveTime = now saveSpStats() end
     end
-
     scheduleHeartbeat(function()
         if sessionTimeLbl then sessionTimeLbl.Text = formatDuration(tick() - SESSION_START) end
         if killCounterLbl then killCounterLbl.Text = tostring(KillCounter) end
-
         local sp, fresh = readSPCurrent()
         if sp ~= nil then
             if spEarnedLbl then spEarnedLbl.Text = formatNumber(sp) end
             if _spSessionStart == nil then
-                _spSessionStart = sp
-                _spSessionStartTime = tick()
-                _spLastValue = sp
-                _spLastValueFresh = true
+                _spSessionStart = sp _spSessionStartTime = tick() _spLastValue = sp _spLastValueFresh = true
             end
-
-            -- ★ Дельты только по свежим
             if fresh and _spLastValueFresh and _spLastValue ~= nil and sp ~= _spLastValue then
                 local delta = sp - _spLastValue
                 if delta > 0 then
@@ -3491,40 +3454,27 @@ do
                 end
                 saveSpStatsThrottled()
             end
-            if fresh then
-                _spLastValue = sp
-                _spLastValueFresh = true
-            end
-
+            if fresh then _spLastValue = sp _spLastValueFresh = true end
             if spPerMinLbl then
                 local elapsed = math.max(1, tick() - (_spSessionStartTime or tick()))
-                if elapsed > 5 then
-                    local perMin = math.floor(_spSessionEarned / elapsed * 60)
-                    spPerMinLbl.Text = formatNumber(perMin)
-                else
-                    spPerMinLbl.Text = "…"
-                end
+                if elapsed > 5 then spPerMinLbl.Text = formatNumber(math.floor(_spSessionEarned / elapsed * 60))
+                else spPerMinLbl.Text = "…" end
             end
-            if spSessionEarnedLbl then
-                spSessionEarnedLbl.Text = formatNumber(_spSessionEarned)
-            end
+            if spSessionEarnedLbl then spSessionEarnedLbl.Text = formatNumber(_spSessionEarned) end
             if spLifetimeSpentLbl then spLifetimeSpentLbl.Text = formatNumber(spStats.lifetimeSpent) end
             if spLifetimeEarnedLbl then spLifetimeEarnedLbl.Text = formatNumber(spStats.lifetimeEarned) end
-
-            -- ★ Показ зафиксированного старта
             if spStartInfoLbl then
                 if spStats.initialSP then
-                    spStartInfoLbl.Text = "📌 Зафиксированный старт: "..formatNumber(spStats.initialSP)
+                    spStartInfoLbl.Text = string.format(T("lbl_start_fixed"), formatNumber(spStats.initialSP))
                     spStartInfoLbl.TextColor3 = Color3.fromRGB(150,150,175)
                 else
-                    spStartInfoLbl.Text = "📌 Старт не зафиксирован"
+                    spStartInfoLbl.Text = T("lbl_start_not_fixed")
                     spStartInfoLbl.TextColor3 = Color3.fromRGB(120,120,140)
                 end
             end
         else
             if spEarnedLbl and spEarnedLbl.Text == "—" then spEarnedLbl.Text = "…" end
         end
-
         local char = LocalPlayer.Character
         if char then
             local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -3553,7 +3503,8 @@ local function collectConfigData()
             AutoClickerCPS=Config.AutoClickerCPS,
             SpeedValue=Config.SpeedValue, FlySpeed=Config.FlySpeed,
             RadarRange=Config.RadarRange,
-            ToggleKey=Config.ToggleKey and Config.ToggleKey.Name or "Delete"},
+            ToggleKey=Config.ToggleKey and Config.ToggleKey.Name or "Delete",
+            Language=LANG},
         Toggles={}, Theme=currentTheme.name,
         SavedPositions={}, Favorites=favoritedPoints, Friends=savedFriends,
     }
@@ -3561,7 +3512,6 @@ local function collectConfigData()
     for name, pos in pairs(savedPositions) do data.SavedPositions[name] = {X=pos.X, Y=pos.Y, Z=pos.Z} end
     return data
 end
-
 local function sanitizeConfigData(data)
     if type(data) ~= "table" then return nil end
     if type(data.Toggles) ~= "table" then data.Toggles = {} end
@@ -3579,15 +3529,10 @@ local function sanitizeConfigData(data)
     for field, range in pairs(numericFields) do
         local v = data.Config[field]
         if type(v) == "number" and v >= range[1] and v <= range[2] then
-        elseif type(v) == "number" then
-            data.Config[field] = math.clamp(v, range[1], range[2])
-        else
-            data.Config[field] = nil
-        end
+        elseif type(v) == "number" then data.Config[field] = math.clamp(v, range[1], range[2])
+        else data.Config[field] = nil end
     end
-    if type(data.Config.ESPColor) ~= "table" then
-        data.Config.ESPColor = nil
-    end
+    if type(data.Config.ESPColor) ~= "table" then data.Config.ESPColor = nil end
     if type(data.Theme) ~= "string" then data.Theme = "Purple" end
     if type(data.SavedPositions) ~= "table" then data.SavedPositions = {} end
     for name, pos in pairs(data.SavedPositions) do
@@ -3599,7 +3544,6 @@ local function sanitizeConfigData(data)
     if type(data.Favorites) ~= "table" then data.Favorites = {} end
     return data
 end
-
 local function applyConfigData(data)
     data = sanitizeConfigData(data)
     if not data then return false end
@@ -3616,15 +3560,9 @@ local function applyConfigData(data)
         if data.Config.AutoFarmDelay and allSliders["AutoFarmDelay"] then
             pcall(function() allSliders["AutoFarmDelay"].setValue(math.clamp(math.floor(data.Config.AutoFarmDelay*10+0.5), 1, 30)) end)
         end
-        if data.Config.SpeedValue and allSliders["SpeedValue"] then
-            pcall(function() allSliders["SpeedValue"].setValue(data.Config.SpeedValue) end)
-        end
-        if data.Config.FlySpeed and allSliders["FlySpeed"] then
-            pcall(function() allSliders["FlySpeed"].setValue(data.Config.FlySpeed) end)
-        end
-        if data.Config.RadarRange and allSliders["RadarRange"] then
-            pcall(function() allSliders["RadarRange"].setValue(data.Config.RadarRange) end)
-        end
+        if data.Config.SpeedValue and allSliders["SpeedValue"] then pcall(function() allSliders["SpeedValue"].setValue(data.Config.SpeedValue) end) end
+        if data.Config.FlySpeed and allSliders["FlySpeed"] then pcall(function() allSliders["FlySpeed"].setValue(data.Config.FlySpeed) end) end
+        if data.Config.RadarRange and allSliders["RadarRange"] then pcall(function() allSliders["RadarRange"].setValue(data.Config.RadarRange) end) end
         if data.Config.ESPColor then
             local ec = data.Config.ESPColor
             if type(setESPColor) == "function" then
@@ -3634,6 +3572,12 @@ local function applyConfigData(data)
         if data.Config.ToggleKey then
             local kc = Enum.KeyCode[data.Config.ToggleKey]
             if kc then Config.ToggleKey = kc if keybindBtn then keybindBtn.Text = kc.Name end end
+        end
+        if data.Config.Language and STR[data.Config.Language] then
+            LANG = data.Config.Language
+            Config.Language = LANG
+            refreshAllLang()
+            updateLangBtn()
         end
     end
     if data.Theme and applyThemeFull then applyThemeFull(data.Theme) end
@@ -3647,52 +3591,35 @@ local function applyConfigData(data)
     exitSilentDelayed(0.8)
     return true
 end
-
 local function getAllConfigs()
     local list = {}
     if not LIST_AVAILABLE then return list end
     local now = tick()
-    for f, t in pairs(recentlyDeleted) do
-        if now - t > RECENT_DELETE_TTL then recentlyDeleted[f] = nil end
-    end
+    for f, t in pairs(recentlyDeleted) do if now - t > RECENT_DELETE_TTL then recentlyDeleted[f] = nil end end
     local autoloadFile = CONFIG_PREFIX .. "_autoload.json"
     local ok, files = pcall(listfiles, "")
-    if not ok or type(files) ~= "table" then
-        ok, files = pcall(listfiles)
-    end
+    if not ok or type(files) ~= "table" then ok, files = pcall(listfiles) end
     if ok and type(files) == "table" then
         for _, f in ipairs(files) do
-            if type(f) == "string"
-            and string.find(f, CONFIG_PREFIX, 1, true)
-            and f ~= autoloadFile
-            and not recentlyDeleted[f] then
+            if type(f) == "string" and string.find(f, CONFIG_PREFIX, 1, true)
+            and f ~= autoloadFile and not recentlyDeleted[f] then
                 local name = string.match(f, CONFIG_PREFIX.."(.-)%.json$")
-                if name then
-                    table.insert(list, {file=f, name=name})
-                end
+                if name then table.insert(list, {file=f, name=name}) end
             end
         end
     end
-    table.sort(list, function(a, b)
-        return string.lower(tostring(a.name)) < string.lower(tostring(b.name))
-    end)
+    table.sort(list, function(a, b) return string.lower(tostring(a.name)) < string.lower(tostring(b.name)) end)
     return list
 end
-
 local function refreshAllOpenConfigLists()
     for _, fn in ipairs(openConfigLists) do pcall(fn) end
 end
 
 -- FPS Booster
-makeSection(pageSettings, "Производительность", "⚡")
+makeSection(pageSettings, "sec_perf", "⚡")
 do
     local fpsBoosterData = nil
-
-    local function isParticle(v)
-        return v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
-            or v:IsA("Fire") or v:IsA("Sparkles")
-    end
-
+    local function isParticle(v) return v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") end
     local function killParticle(v)
         if not fpsBoosterData then return end
         if isParticle(v) and v.Enabled then
@@ -3700,38 +3627,21 @@ do
             pcall(function() v.Enabled = false end)
         end
     end
-
     local function toggleFPSBooster(state)
         Config.FPSBooster = state
         if state then
             if not fpsBoosterData then
-                fpsBoosterData = {
-                    GlobalShadows = Lighting.GlobalShadows,
-                    Effects = {},
-                    disabled = {},
-                    descendantConn = nil,
-                }
+                fpsBoosterData = {GlobalShadows=Lighting.GlobalShadows, Effects={}, disabled={}, descendantConn=nil}
                 for _, v in ipairs(Lighting:GetChildren()) do
-                    if v:IsA("PostEffect") then
-                        fpsBoosterData.Effects[v] = { Enabled = v.Enabled }
-                    elseif v:IsA("Atmosphere") then
-                        fpsBoosterData.Effects[v] = { Density = v.Density, Haze = v.Haze, Glare = v.Glare }
-                    end
+                    if v:IsA("PostEffect") then fpsBoosterData.Effects[v] = {Enabled=v.Enabled}
+                    elseif v:IsA("Atmosphere") then fpsBoosterData.Effects[v] = {Density=v.Density, Haze=v.Haze, Glare=v.Glare} end
                 end
             end
             Lighting.GlobalShadows = false
             for _, v in ipairs(Lighting:GetChildren()) do
-                if v:IsA("PostEffect") then
-                    pcall(function() v.Enabled = false end)
-                elseif v:IsA("Atmosphere") then
-                    pcall(function()
-                        v.Density = 0
-                        v.Haze = 0
-                        v.Glare = 0
-                    end)
-                end
+                if v:IsA("PostEffect") then pcall(function() v.Enabled = false end)
+                elseif v:IsA("Atmosphere") then pcall(function() v.Density=0 v.Haze=0 v.Glare=0 end) end
             end
-
             task.spawn(function()
                 local data = fpsBoosterData
                 for _, v in ipairs(workspace:GetDescendants()) do
@@ -3739,12 +3649,10 @@ do
                     killParticle(v)
                 end
             end)
-
             fpsBoosterData.descendantConn = workspace.DescendantAdded:Connect(function(v)
                 if Config.FPSBooster then killParticle(v) end
             end)
-
-            showToast("FPS Booster: ON", C.success, "⚡")
+            showToast(T("toast_fps_on"), C.success, "⚡")
         else
             if fpsBoosterData then
                 if fpsBoosterData.descendantConn then
@@ -3754,9 +3662,7 @@ do
                 pcall(function() Lighting.GlobalShadows = fpsBoosterData.GlobalShadows end)
                 for v, orig in pairs(fpsBoosterData.Effects) do
                     if v and v.Parent then
-                        pcall(function()
-                            for k, val in pairs(orig) do v[k] = val end
-                        end)
+                        pcall(function() for k, val in pairs(orig) do v[k] = val end end)
                     end
                 end
                 for v in pairs(fpsBoosterData.disabled) do
@@ -3764,13 +3670,12 @@ do
                 end
                 fpsBoosterData = nil
             end
-            showToast("FPS Booster: OFF", C.warn, "⚡")
+            showToast(T("toast_fps_off"), C.warn, "⚡")
         end
     end
-    createToggle(pageSettings, "FPS Booster", false, toggleFPSBooster, "FPSBooster", "Убирает частицы, тени и эффекты для +FPS")
+    createToggle(pageSettings, "tog_fps", false, toggleFPSBooster, "FPSBooster", "desc_fps")
 end
 
--- Anti-AFK
 do
     local antiAFKConn = nil
     local function antiAFKAction()
@@ -3798,20 +3703,19 @@ do
         if state then
             if antiAFKConn then pcall(function() antiAFKConn:Disconnect() end) end
             antiAFKConn = track(LocalPlayer.Idled:Connect(function() antiAFKAction() end))
-            showToast("Anti-AFK: ON", C.success, "🛡")
+            showToast(T("toast_antiafk_on"), C.success, "🛡")
         else
             if antiAFKConn then pcall(function() antiAFKConn:Disconnect() end) antiAFKConn = nil end
-            showToast("Anti-AFK: OFF", C.warn, "🛡")
+            showToast(T("toast_antiafk_off"), C.warn, "🛡")
         end
     end
-    createToggle(pageSettings, "Anti-AFK", false, toggleAntiAFK, "AntiAFK", "Не выкидывает за простой")
+    createToggle(pageSettings, "tog_antiafk", false, toggleAntiAFK, "AntiAFK", "desc_antiafk")
 end
 
-makeSection(pageSettings, "Конфиги", "💾")
-
-createButton(pageSettings, "Сохранить конфиг", C.success, function()
-    if not FS_AVAILABLE then showToast("FS недоступна", C.danger, "⚠") return end
-    showInputDialog("Сохранить конфиг", "Мой конфиг", "Название...", function(name)
+makeSection(pageSettings, "sec_configs", "💾")
+createButton(pageSettings, "btn_save_config", C.success, function()
+    if not FS_AVAILABLE then showToast(T("toast_fs_unavail"), C.danger, "⚠") return end
+    showInputDialog(T("dlg_save_cfg"), T("dlg_cfg_name"), T("dlg_cfg_name_ph"), function(name)
         name = string.gsub(name, '[\\/:*?"<>|]', "_")
         name = string.gsub(name, "%.%.", "_")
         name = name:gsub("^%s+", ""):gsub("%s+$", "")
@@ -3822,16 +3726,16 @@ createButton(pageSettings, "Сохранить конфиг", C.success, functio
             writefile(CONFIG_PREFIX..name..".json", HttpService:JSONEncode(data))
         end)
         if ok then
-            showToast("Конфиг сохранён: "..name, C.success, "✓")
+            showToast(string.format(T("toast_cfg_saved"), name), C.success, "✓")
             refreshAllOpenConfigLists()
         else
-            showToast("Ошибка сохранения", C.danger, "⚠")
+            showToast(T("toast_cfg_save_err"), C.danger, "⚠")
         end
     end)
 end, "💾")
 
-createButton(pageSettings, "Загрузить конфиг", C.accent, function()
-    if not FS_AVAILABLE or not LIST_AVAILABLE then showToast("FS недоступна", C.danger, "⚠") return end
+createButton(pageSettings, "btn_load_config", C.accent, function()
+    if not FS_AVAILABLE or not LIST_AVAILABLE then showToast(T("toast_fs_unavail"), C.danger, "⚠") return end
     local overlay = new("Frame", { Size=UDim2.new(1,0,1,0), BackgroundColor3=Color3.new(0,0,0),
         BackgroundTransparency=0.6, BorderSizePixel=0, ZIndex=1, Parent=dialogGui })
     local win = new("Frame", { Size=UDim2.new(0,420,0,480), Position=UDim2.new(0.5,-210,0.5,-240),
@@ -3840,7 +3744,7 @@ createButton(pageSettings, "Загрузить конфиг", C.accent, function
     stroke(win, C.accent, 1.2, 0.4)
     gradient(win, C.bg, C.bgAlt, 135)
     new("TextLabel", {Size=UDim2.new(1,-70,0,26), Position=UDim2.new(0,22,0,18),
-        BackgroundTransparency=1, Text="Загрузить конфиг",
+        BackgroundTransparency=1, Text=T("dlg_load_cfg"),
         TextColor3=C.text, Font=DS.F.title, TextSize=15,
         TextXAlignment=Enum.TextXAlignment.Left, ZIndex=3, Parent=win})
     local listFrame = new("ScrollingFrame", {Size=UDim2.new(1,-32,1,-98), Position=UDim2.new(0,16,0,72),
@@ -3849,17 +3753,14 @@ createButton(pageSettings, "Загрузить конфиг", C.accent, function
         CanvasSize=UDim2.new(0,0,0,0), AutomaticCanvasSize=Enum.AutomaticSize.Y,
         ZIndex=3, Parent=win})
     new("UIListLayout", {Padding=UDim.new(0,8), Parent=listFrame})
-
     local function rebuildConfigsUI()
         if not listFrame or not listFrame.Parent then return end
         listFrame.CanvasSize = UDim2.new(0,0,0,0)
-        for _, ch in ipairs(listFrame:GetChildren()) do
-            if not ch:IsA("UIListLayout") then ch:Destroy() end
-        end
+        for _, ch in ipairs(listFrame:GetChildren()) do if not ch:IsA("UIListLayout") then ch:Destroy() end end
         local configs = getAllConfigs()
         if #configs == 0 then
             new("TextLabel", {Size=UDim2.new(1,0,0,40), BackgroundTransparency=1,
-                Text="Нет сохранённых конфигов", TextColor3=C.textMuted,
+                Text=T("dlg_no_configs"), TextColor3=C.textMuted,
                 Font=DS.F.subtle, TextSize=12,
                 TextXAlignment=Enum.TextXAlignment.Center, ZIndex=4, Parent=listFrame})
             return
@@ -3884,26 +3785,24 @@ createButton(pageSettings, "Загрузить конфиг", C.accent, function
                 if ok and isfile then reallyDeleted = not isfile(cfg.file) end
                 if ok and reallyDeleted then
                     recentlyDeleted[cfg.file] = tick()
-                    showToast("Конфиг удалён: "..cfg.name, C.danger, "🗑")
+                    showToast(string.format(T("toast_cfg_deleted"), cfg.name), C.danger, "🗑")
                     refreshAllOpenConfigLists()
                     task.delay(0.5, refreshAllOpenConfigLists)
                 elseif ok then
-                    showToast("Файл занят — попробуй позже", C.warn, "⚠")
+                    showToast(T("toast_cfg_busy"), C.warn, "⚠")
                 else
-                    showToast("Не удалось удалить", C.warn, "⚠")
+                    showToast(T("toast_cfg_del_fail"), C.warn, "⚠")
                 end
             end)
             delBtn.Position = UDim2.new(1,-44,0.5,-16) delBtn.ZIndex = 5
             loadBtn.MouseButton1Click:Connect(function()
-                local ok = pcall(function()
-                    applyConfigData(HttpService:JSONDecode(readfile(cfg.file)))
-                end)
+                local ok = pcall(function() applyConfigData(HttpService:JSONDecode(readfile(cfg.file))) end)
                 if ok then
                     for idx, fn in ipairs(openConfigLists) do
                         if fn == rebuildConfigsUI then table.remove(openConfigLists, idx) break end
                     end
                     overlay:Destroy() win:Destroy()
-                    task.delay(0.5, function() showToast("Загружено: "..cfg.name, C.success, "📂") end)
+                    task.delay(0.5, function() showToast(string.format(T("toast_cfg_loaded"), cfg.name), C.success, "📂") end)
                 end
             end)
         end
@@ -3929,7 +3828,7 @@ createButton(pageSettings, "Загрузить конфиг", C.accent, function
     end)
 end, "📂")
 
-createButton(pageSettings, "Сбросить настройки", C.warn, function()
+createButton(pageSettings, "btn_reset_all", C.warn, function()
     enterSilent()
     for _, d in pairs(allToggles) do pcall(function() d.setState(false, true) end) end
     if allSliders["HitboxSize"] then allSliders["HitboxSize"].setValue(15) end
@@ -3943,16 +3842,15 @@ createButton(pageSettings, "Сбросить настройки", C.warn, functi
     if keybindBtn then keybindBtn.Text = "Delete" end
     if applyThemeFull then applyThemeFull("Purple") end
     exitSilentDelayed(0.8)
-    task.delay(1.0, function() showToast("Настройки сброшены", C.warn, "🔄") end)
+    task.delay(1.0, function() showToast(T("toast_reset_settings"), C.warn, "🔄") end)
 end, "🆕")
 
-makeSection(pageSettings, "Тема", "🎨")
+makeSection(pageSettings, "sec_theme", "🎨")
 do
     local themesList = new("Frame", { Size=UDim2.new(1,-8,0,0), BackgroundTransparency=1,
         AutomaticSize=Enum.AutomaticSize.Y, Parent=pageSettings })
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal, Padding=UDim.new(0,8),
         SortOrder=Enum.SortOrder.LayoutOrder, Wraps=true, Parent=themesList })
-
     applyThemeFull = function(themeName)
         local newTheme = nil
         for _, t in ipairs(THEMES) do if t.name == themeName then newTheme = t break end end
@@ -3974,22 +3872,18 @@ do
                             local field = TRANSP_FIELD[bgRole]
                             if field then
                                 local baseTransp = desc:GetAttribute("_baseTransp") or 0
-                                if baseTransp == 0 then
-                                    desc.BackgroundTransparency = newTheme[field] or 0
-                                end
+                                if baseTransp == 0 then desc.BackgroundTransparency = newTheme[field] or 0 end
                             end
                         end
                         if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
-                            if nowGlass then
-                                applyGlassTextTo(desc)
+                            if nowGlass then applyGlassTextTo(desc)
                             else
                                 if prevGlass then
                                     desc.TextStrokeTransparency = 1
                                     if desc:IsA("TextBox") then desc.PlaceholderColor3 = C.textMuted end
                                 end
                                 local role = desc:GetAttribute("_textRole")
-                                if role and TEXT_ROLES[role] then
-                                    desc.TextColor3 = TEXT_ROLES[role]
+                                if role and TEXT_ROLES[role] then desc.TextColor3 = TEXT_ROLES[role]
                                 else
                                     local customColor = desc:GetAttribute("_customTextColor")
                                     if customColor then desc.TextColor3 = customColor end
@@ -4013,7 +3907,6 @@ do
             end
         end
     end
-
     for _, t in ipairs(THEMES) do
         local btn = new("TextButton", { Size=UDim2.new(0,78,0,38), BackgroundColor3=t.accent, Text=t.name,
             TextColor3=Color3.fromRGB(255,255,255), Font=DS.F.bold, TextSize=11,
@@ -4021,33 +3914,28 @@ do
         btn:SetAttribute("_bgRole", nil) btn:SetAttribute("_textRole", nil)
         btn:SetAttribute("_baseColor", nil) btn:SetAttribute("_baseTransp", nil)
         corner(btn, DS.R.chip)
-        btn.MouseEnter:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(DS.A.fast), { Size=UDim2.new(0,82,0,40) }):Play()
-        end)
-        btn.MouseLeave:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(DS.A.fast), { Size=UDim2.new(0,78,0,38) }):Play()
-        end)
+        btn.MouseEnter:Connect(function() TweenService:Create(btn, TweenInfo.new(DS.A.fast), { Size=UDim2.new(0,82,0,40) }):Play() end)
+        btn.MouseLeave:Connect(function() TweenService:Create(btn, TweenInfo.new(DS.A.fast), { Size=UDim2.new(0,78,0,38) }):Play() end)
         btn.MouseButton1Click:Connect(function()
             applyThemeFull(t.name)
-            showToast("Тема: "..t.name, t.accent, "🎨")
+            showToast(string.format(T("toast_theme"), t.name), t.accent, "🎨")
         end)
     end
 end
 
-makeSection(pageSettings, "Управление", "⌨")
+makeSection(pageSettings, "sec_controls", "⌨")
 do
     local keybindCard = new("Frame", { Size=UDim2.new(1,-8,0,58), BackgroundColor3=C.card, BackgroundTransparency=0.05,
         BorderSizePixel=0, Parent=pageSettings })
     corner(keybindCard, DS.R.card)
     stroke(keybindCard, C.border, 1, 0.5)
-    new("TextLabel", { Size=UDim2.new(1,-150,0,18), Position=UDim2.new(0,16,0,10),
-        BackgroundTransparency=1, Text="Скрыть / показать скрипт",
-        TextColor3=C.text, Font=DS.F.body, TextSize=13,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=keybindCard })
-    new("TextLabel", { Size=UDim2.new(1,-150,0,14), Position=UDim2.new(0,16,0,32),
-        BackgroundTransparency=1, Text="Нажми кнопку и введи клавишу",
-        TextColor3=C.textMuted, Font=DS.F.subtle, TextSize=10,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=keybindCard })
+    regLang(new("TextLabel", { Size=UDim2.new(1,-150,0,18), Position=UDim2.new(0,16,0,10),
+        BackgroundTransparency=1, TextColor3=C.text, Font=DS.F.body, TextSize=13,
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=keybindCard }), "lbl_hide")
+    regLang(new("TextLabel", { Size=UDim2.new(1,-150,0,14), Position=UDim2.new(0,16,0,32),
+        BackgroundTransparency=1, TextColor3=C.textMuted,
+        Font=DS.F.subtle, TextSize=10,
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=keybindCard }), "lbl_hide_desc")
     keybindBtn = new("TextButton", { Size=UDim2.new(0,120,0,36), Position=UDim2.new(1,-136,0.5,-18),
         BackgroundColor3=C.accent, Text=Config.ToggleKey.Name, TextColor3=Color3.fromRGB(255,255,255),
         Font=DS.F.bold, TextSize=12, BorderSizePixel=0, AutoButtonColor=false, Parent=keybindCard })
@@ -4068,19 +3956,18 @@ do
     keybindBtn.MouseButton1Click:Connect(function()
         if capturingKey then return end
         capturingKey = true
-        keybindBtn.Text = "Нажми..."
+        keybindBtn.Text = "…"
         keybindBtn.BackgroundColor3 = C.warn
     end)
 end
 
-makeSection(pageSettings, "Друзья (уведомления)", "👥")
+makeSection(pageSettings, "sec_friends_notif", "👥")
 local friendsList
 local rebuildFriendsList
 do
     friendsList = new("Frame", { Size=UDim2.new(1,-8,0,0), BackgroundTransparency=1,
         AutomaticSize=Enum.AutomaticSize.Y, Parent=pageSettings })
     new("UIListLayout", { Padding=UDim.new(0,6), Parent=friendsList })
-
     rebuildFriendsList = function()
         for _, ch in ipairs(friendsList:GetChildren()) do
             if not ch:IsA("UIListLayout") then ch:Destroy() end
@@ -4106,36 +3993,31 @@ do
                 savedFriends[name] = nil
                 rebuildFriendsList()
                 if FS_AVAILABLE then pcall(function() writefile(FRIENDS_FILE, HttpService:JSONEncode(savedFriends)) end) end
-                showToast("Удалён: "..name, C.warn, "👤")
+                showToast(string.format(T("toast_friend_removed"), name), C.warn, "👤")
             end)
             delBtn.Position = UDim2.new(1,-38,0.5,-14)
         end
     end
-
-    createButton(pageSettings, "Добавить друга", C.accent, function()
-        showInputDialog("Добавить друга", "", "Ник игрока...", function(name)
+    createButton(pageSettings, "btn_add_friend", C.accent, function()
+        showInputDialog(T("dlg_add_friend"), "", T("dlg_player_name"), function(name)
             savedFriends[name] = true
             rebuildFriendsList()
             if FS_AVAILABLE then pcall(function() writefile(FRIENDS_FILE, HttpService:JSONEncode(savedFriends)) end) end
-            showToast("Добавлен: "..name, C.accent, "👤")
+            showToast(string.format(T("toast_friend_added"), name), C.accent, "👤")
         end)
     end, "➕")
 end
 
--- ═══ DISCORD ═══
-makeSection(pageSettings, "Соцсети", "💬")
+makeSection(pageSettings, "sec_social", "💬")
 do
     local DISCORD_URL = "https://discord.gg/K3ksDHaCdA"
-
     local function copyToClipboard(text)
         pcall(function()
             if setclipboard then setclipboard(text)
             elseif toclipboard then toclipboard(text)
-            elseif syn and syn.set_clipboard then syn.set_clipboard(text)
-            end
+            elseif syn and syn.set_clipboard then syn.set_clipboard(text) end
         end)
     end
-
     local function openInBrowser(url)
         local functions = {
             function() if launch then launch(url) end end,
@@ -4149,7 +4031,6 @@ do
         end
         return false
     end
-
     local discordCard = new("TextButton", {
         Size=UDim2.new(1,-8,0,58),
         BackgroundColor3=Color3.fromRGB(88,101,242),
@@ -4161,7 +4042,6 @@ do
     local dStroke = stroke(discordCard, Color3.fromRGB(88,101,242), 1, 0.4)
     discordCard:SetAttribute("_bgRole", nil)
     discordCard:SetAttribute("_baseColor", Color3.fromRGB(88,101,242))
-
     local dLogo = new("Frame", {
         Size=UDim2.new(0,38,0,38), Position=UDim2.new(0,14,0.5,-19),
         BackgroundColor3=Color3.fromRGB(255,255,255), BackgroundTransparency=0.85,
@@ -4169,34 +4049,22 @@ do
     })
     corner(dLogo, DS.R.round)
     stroke(dLogo, Color3.fromRGB(255,255,255), 1, 0.3)
-    new("TextLabel", {
-        Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
+    new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
         Text="💬", TextColor3=Color3.fromRGB(255,255,255),
-        Font=DS.F.bold, TextSize=20, Parent=dLogo
-    })
-
-    new("TextLabel", {
-        Size=UDim2.new(1,-150,0,20), Position=UDim2.new(0,64,0,10),
+        Font=DS.F.bold, TextSize=20, Parent=dLogo })
+    new("TextLabel", { Size=UDim2.new(1,-150,0,20), Position=UDim2.new(0,64,0,10),
         BackgroundTransparency=1, Text="Discord",
         TextColor3=Color3.fromRGB(255,255,255),
         Font=DS.F.bold, TextSize=15,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=discordCard
-    })
-    new("TextLabel", {
-        Size=UDim2.new(1,-150,0,14), Position=UDim2.new(0,64,0,32),
-        BackgroundTransparency=1, Text="Присоединяйся к нашей группе",
-        TextColor3=Color3.fromRGB(225,230,255),
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=discordCard })
+    regLang(new("TextLabel", { Size=UDim2.new(1,-150,0,14), Position=UDim2.new(0,64,0,32),
+        BackgroundTransparency=1, TextColor3=Color3.fromRGB(225,230,255),
         Font=DS.F.subtle, TextSize=11,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=discordCard
-    })
-    new("TextLabel", {
-        Size=UDim2.new(0,90,1,0), Position=UDim2.new(1,-100,0,0),
-        BackgroundTransparency=1, Text="Открыть →",
-        TextColor3=Color3.fromRGB(255,255,255),
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=discordCard }), "discord_join")
+    regLang(new("TextLabel", { Size=UDim2.new(0,90,1,0), Position=UDim2.new(1,-100,0,0),
+        BackgroundTransparency=1, TextColor3=Color3.fromRGB(255,255,255),
         Font=DS.F.bold, TextSize=12,
-        TextXAlignment=Enum.TextXAlignment.Right, Parent=discordCard
-    })
-
+        TextXAlignment=Enum.TextXAlignment.Right, Parent=discordCard }), "discord_open")
     discordCard.MouseEnter:Connect(function()
         TweenService:Create(discordCard, TweenInfo.new(DS.A.fast), { BackgroundTransparency=0 }):Play()
         TweenService:Create(dStroke, TweenInfo.new(DS.A.fast), { Transparency=0 }):Play()
@@ -4207,17 +4075,14 @@ do
     end)
     discordCard.MouseButton1Click:Connect(function()
         copyToClipboard(DISCORD_URL)
-        showToast("Ссылка скопирована", C.success, "📋")
+        showToast(T("toast_link_copied"), C.success, "📋")
         task.wait(0.2)
         local opened = openInBrowser(DISCORD_URL)
-        if not opened then
-            showToast("Ссылка в буфере — вставь в браузер", C.warn, "⚠")
-        end
+        if not opened then showToast(T("toast_link_buffer"), C.warn, "⚠") end
     end)
 end
 
--- ═══ ОБ АВТОРЕ ═══
-makeSection(pageSettings, "Об о мне", "👤")
+makeSection(pageSettings, "sec_about", "👤")
 do
     local aboutCard = new("Frame", {
         Size=UDim2.new(1,-8,0,58),
@@ -4226,7 +4091,6 @@ do
     })
     corner(aboutCard, DS.R.card)
     stroke(aboutCard, C.border, 1, 0.5)
-
     local aLogo = new("Frame", {
         Size=UDim2.new(0,38,0,38), Position=UDim2.new(0,14,0.5,-19),
         BackgroundColor3=C.accent, BackgroundTransparency=0.82,
@@ -4234,26 +4098,18 @@ do
     })
     corner(aLogo, DS.R.round)
     stroke(aLogo, C.accent, 1, 0.4)
-    new("TextLabel", {
-        Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
+    new("TextLabel", { Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
         Text="⚡", TextColor3=C.accent,
-        Font=DS.F.bold, TextSize=18, Parent=aLogo
-    })
-
-    new("TextLabel", {
-        Size=UDim2.new(1,-80,0,20), Position=UDim2.new(0,64,0,10),
-        BackgroundTransparency=1, Text="Script сделал Hirago",
-        TextColor3=C.text,
+        Font=DS.F.bold, TextSize=18, Parent=aLogo })
+    regLang(new("TextLabel", { Size=UDim2.new(1,-80,0,20), Position=UDim2.new(0,64,0,10),
+        BackgroundTransparency=1, TextColor3=C.text,
         Font=DS.F.bold, TextSize=14,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=aboutCard
-    })
-    new("TextLabel", {
-        Size=UDim2.new(1,-80,0,14), Position=UDim2.new(0,64,0,32),
-        BackgroundTransparency=1, Text="Skill Point Legends • Utility v27.22",
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=aboutCard }), "about_text")
+    new("TextLabel", { Size=UDim2.new(1,-80,0,14), Position=UDim2.new(0,64,0,32),
+        BackgroundTransparency=1, Text="Skill Point Legends • Utility v28.1",
         TextColor3=C.textMuted,
         Font=DS.F.subtle, TextSize=11,
-        TextXAlignment=Enum.TextXAlignment.Left, Parent=aboutCard
-    })
+        TextXAlignment=Enum.TextXAlignment.Left, Parent=aboutCard })
 end
 
 -- input dialog
@@ -4277,7 +4133,7 @@ showInputDialog = function(title, default, placeholder, onSave)
     stroke(inputBg, C.border, 1, 0.5)
     local input = new("TextBox", { Size=UDim2.new(1,-24,1,0), Position=UDim2.new(0,12,0,0),
         BackgroundTransparency=1, Text=default or "",
-        PlaceholderText=placeholder or "Введите...",
+        PlaceholderText=placeholder or T("dlg_enter"),
         PlaceholderColor3=C.textMuted, TextColor3=C.text,
         Font=DS.F.body, TextSize=13, ClearTextOnFocus=false, ZIndex=13, Parent=inputBg })
     local btnRow = new("Frame", { Size=UDim2.new(1,-40,0,40), Position=UDim2.new(0,20,1,-54),
@@ -4285,7 +4141,7 @@ showInputDialog = function(title, default, placeholder, onSave)
     new("UIListLayout", { FillDirection=Enum.FillDirection.Horizontal,
         Padding=UDim.new(0,10), SortOrder=Enum.SortOrder.LayoutOrder, Parent=btnRow })
     local cancelBtn = new("TextButton", { Size=UDim2.new(0.5,-5,1,0), BackgroundColor3=C.card, BackgroundTransparency=0.1,
-        Text="Отмена", TextColor3=C.text, Font=DS.F.bold, TextSize=12,
+        Text=T("dlg_cancel"), TextColor3=C.text, Font=DS.F.bold, TextSize=12,
         BorderSizePixel=0, AutoButtonColor=false, LayoutOrder=1, ZIndex=13, Parent=btnRow })
     corner(cancelBtn, DS.R.chip)
     stroke(cancelBtn, C.border, 1, 0.5)
@@ -4313,9 +4169,7 @@ showInputDialog = function(title, default, placeholder, onSave)
         if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then
             local pos = inp.Position
             local ap, asz = dialog.AbsolutePosition, dialog.AbsoluteSize
-            if pos.X < ap.X or pos.X > ap.X + asz.X or pos.Y < ap.Y or pos.Y > ap.Y + asz.Y then
-                close()
-            end
+            if pos.X < ap.X or pos.X > ap.X + asz.X or pos.Y < ap.Y or pos.Y > ap.Y + asz.Y then close() end
         end
     end)
     saveBtn.MouseButton1Click:Connect(function()
@@ -4330,15 +4184,15 @@ end
 track(Players.PlayerAdded:Connect(function(plr)
     if not Config.NotifyFriends or isShuttingDown then return end
     if savedFriends[plr.Name] then
-        chatNotify("🟢 Друг зашёл: "..plr.Name)
-        showToast("Друг зашёл: "..plr.Name, C.success, "🟢")
+        chatNotify(string.format(T("chat_friend_joined"), plr.Name))
+        showToast(string.format(T("toast_friend_joined"), plr.Name), C.success, "🟢")
     end
 end))
 track(Players.PlayerRemoving:Connect(function(plr)
     if not Config.NotifyFriends or isShuttingDown then return end
     if savedFriends[plr.Name] then
-        chatNotify("🔴 Друг вышел: "..plr.Name)
-        showToast("Друг вышел: "..plr.Name, C.danger, "🔴")
+        chatNotify(string.format(T("chat_friend_left"), plr.Name))
+        showToast(string.format(T("toast_friend_left"), plr.Name), C.danger, "🔴")
     end
 end))
 
@@ -4353,7 +4207,7 @@ track(UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 local restore = keybindBtn:GetAttribute("_baseColor") or C.accent
                 keybindBtn.BackgroundColor3 = restore
             end
-            showToast("Кнопка скрытия: "..input.KeyCode.Name, C.accent, "⌨")
+            showToast(string.format(T("toast_key_hide"), input.KeyCode.Name), C.accent, "⌨")
         end
         return
     end
@@ -4362,12 +4216,10 @@ track(UserInputService.InputBegan:Connect(function(input, gameProcessed)
         local ns = not screenGui.Enabled
         screenGui.Enabled, toastGui.Enabled, dialogGui.Enabled = ns, ns, ns
         if not ns then
-            showStatus("Скрипт скрыт  ·  "..Config.ToggleKey.Name.." для возврата", Color3.fromRGB(255, 200, 80), 3)
+            showStatus(string.format(T("toast_hide_hint"), Config.ToggleKey.Name), Color3.fromRGB(255, 200, 80), 3)
         else
             hideStatus()
-            task.defer(function()
-                showToast("Скрипт показан", C.accent, "⚡")
-            end)
+            task.defer(function() showToast(T("toast_script_shown"), C.accent, "⚡") end)
         end
         return
     end
@@ -4378,7 +4230,7 @@ track(UserInputService.InputBegan:Connect(function(input, gameProcessed)
             local char = LocalPlayer.Character
             if char then
                 pcall(function() char:PivotTo(CFrame.new(mob.hrp.Position + Vector3.new(0,3,2))) end)
-                showToast("Телепорт к "..(mob.displayName or mob.model.Name), C.accent, "⚔")
+                showToast(string.format(T("toast_tp_mob"), (mob.displayName or mob.model.Name)), C.accent, "⚔")
             end
         end
     elseif input.KeyCode == Enum.KeyCode.F2 then
@@ -4395,7 +4247,6 @@ shutdown = function()
     isDialogOpen = false
     Config.AutoFarm, Config.AutoClicker = false, false
     for id in pairs(_hbTasks) do unscheduleHeartbeat(id) end
-    -- ★ Патч: сохранение SP-статистики при выходе
     for _, fn in ipairs(_shutdownHooks) do pcall(fn) end
     pcall(function()
         if toggleRegistry["InfiniteJump"] then toggleRegistry["InfiniteJump"].setState(false, true) end
@@ -4430,7 +4281,7 @@ shutdown = function()
     for _, gui in ipairs({screenGui, toastGui, dialogGui, statusGui}) do
         pcall(function() if gui then gui:Destroy() end end)
     end
-    showStatus("Скрипт выключен", Color3.fromRGB(255, 90, 100), 3.5)
+    showStatus(T("toast_script_off"), Color3.fromRGB(255, 90, 100), 3.5)
 end
 
 task.delay(2, function()
@@ -4442,9 +4293,7 @@ task.delay(2, function()
             applyConfigData(HttpService:JSONDecode(readfile(autoloadFile)))
             loaded = true
         end)
-        if not ok or not loaded then
-            pcall(function() delfile(autoloadFile) end)
-        end
+        if not ok or not loaded then pcall(function() delfile(autoloadFile) end) end
     end
     if not loaded and FS_AVAILABLE and LIST_AVAILABLE then
         pcall(function()
@@ -4470,14 +4319,12 @@ track(Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
     if isShuttingDown then return end
     task.wait(0.8)
     if isShuttingDown then return end
-
     if Config.SpeedHack then
         pcall(function()
             local hum = newChar:WaitForChild("Humanoid", 5)
             if hum then hum.WalkSpeed = Config.SpeedValue end
         end)
     end
-
     if Config.Noclip then
         pcall(function()
             for _, part in ipairs(newChar:GetDescendants()) do
@@ -4498,9 +4345,7 @@ do
             fpsLastTime = now
         end
     end, 1/60, "fpsCounter")
-
     local pingItem = Stats.Network.ServerStatsItem and Stats.Network.ServerStatsItem["Data Ping"]
-
     task.spawn(function()
         while not isShuttingDown do
             pcall(function()
@@ -4522,7 +4367,6 @@ do
 end
 
 print("═══════════════════════════════════════")
-print("[Utility v27.22] Загружено для "..LocalPlayer.Name)
-print("[Patches] SP-fix + perf + security all applied")
+print("[Utility v28.1] Loaded for "..LocalPlayer.Name.." | Lang: "..LANG)
 print("═══════════════════════════════════════")
-showToast("Скрипт загружен", C.accent, "⚡")
+showToast(T("toast_script_loaded"), C.accent, "⚡")
