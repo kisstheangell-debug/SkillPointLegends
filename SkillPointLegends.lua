@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════
---   +1 Skill Point Legends — Utility v28.1 (RUS/ENG + mini fix)
+--   +1 Skill Point Legends — Utility v28.2 (Hitbox death fix)
 -- ═══════════════════════════════════════════════════════════
 
 local Players         = game:GetService("Players")
@@ -18,7 +18,6 @@ local LocalPlayer = Players.LocalPlayer
 local SESSION_START = tick()
 local KillCounter = 0
 
--- ═══ HIDDEN PARENT ═══
 local function tryParent(p)
     if not p then return false end
     local ok = pcall(function() local t = Instance.new("Folder"); t.Parent = p; t:Destroy() end)
@@ -41,7 +40,6 @@ for _, name in ipairs({"SkillPointUtility","SPU_Settings","SPU_Toasts","SPU_Dial
     if old then old:Destroy() end
 end
 
--- ═══ LANGUAGE SYSTEM ═══
 local LANG = "RUS"
 local STR = {
     RUS = {
@@ -244,33 +242,19 @@ local function regLang(inst, key)
     table.insert(textRegistry, inst)
     return inst
 end
-local function regPlaceholder(inst, key)
-    inst:SetAttribute("_langPlaceholder", key)
-    inst.PlaceholderText = T(key)
-    table.insert(textRegistry, inst)
-    return inst
-end
 local function refreshAllLang()
     for _, inst in ipairs(textRegistry) do
         if inst and inst.Parent then
             local k = inst:GetAttribute("_langKey")
-            local pk = inst:GetAttribute("_langPlaceholder")
             local sk = inst:GetAttribute("_langSectionKey")
             if sk then
                 local icon = inst:GetAttribute("_langSectionIcon") or ""
                 inst.Text = (icon ~= "" and (icon.."  ") or "")..string.upper(T(sk))
-            elseif pk and inst:IsA("TextBox") then
-                inst.PlaceholderText = T(pk)
             elseif k and (inst:IsA("TextLabel") or inst:IsA("TextButton")) then
                 inst.Text = T(k)
             end
         end
     end
-end
-local function setLang(newLang)
-    if LANG == newLang then return end
-    LANG = newLang
-    refreshAllLang()
 end
 
 local CONFIG_PREFIX = "SPU_config_"
@@ -299,7 +283,6 @@ local function disconnectAll()
 end
 local shutdown
 
--- ═══ SCHEDULER ═══
 local _hbTasks = {}
 local _hbCounter = 0
 local function scheduleHeartbeat(fn, intervalSec, name)
@@ -441,7 +424,6 @@ local TEXT_ROLES = {
 }
 local GLASS_PLACEHOLDER = Color3.fromRGB(200,200,215)
 
--- ═══ DESIGN SYSTEM ═══
 local new, corner, stroke, gradient, drawCrossIcon, applyGlassTextTo
 do
     local function findRole(color)
@@ -584,7 +566,6 @@ local function createDeleteButton(parent, size, callback)
     return btn
 end
 
--- ═══ SCREEN GUIS ═══
 local toastGui = new("ScreenGui", {
     Name="SPU_Toasts", ResetOnSpawn=false, ZIndexBehavior=Enum.ZIndexBehavior.Sibling,
     IgnoreGuiInset=true, DisplayOrder=500, Parent=HIDDEN_PARENT
@@ -600,7 +581,6 @@ local statusGui = new("ScreenGui", {
 protectGui(dialogGui)
 protectGui(statusGui)
 
--- ═══ TOASTS ═══
 local showToast, chatNotify
 do
     local toastStack = {}
@@ -706,7 +686,6 @@ do
     end
 end
 
--- ═══ STATUS ═══
 local showStatus, hideStatus
 do
     local statusFrame = new("Frame", {
@@ -769,7 +748,6 @@ do
     end
 end
 
--- ═══ MAIN UI ═══
 local screenGui = new("ScreenGui", {
     Name="SkillPointUtility", ResetOnSpawn=false, ZIndexBehavior=Enum.ZIndexBehavior.Sibling,
     IgnoreGuiInset=true, DisplayOrder=10, Parent=HIDDEN_PARENT
@@ -809,7 +787,7 @@ local titleLbl = new("TextLabel", { Size=UDim2.new(0,220,0,18), Position=UDim2.n
     BackgroundTransparency=1, Text="Skill Point Legends", TextColor3=C.text,
     Font=DS.F.title, TextSize=15, TextXAlignment=Enum.TextXAlignment.Left, Parent=header })
 local subtitleLbl = new("TextLabel", { Size=UDim2.new(0,220,0,14), Position=UDim2.new(0,68,0,34),
-    BackgroundTransparency=1, Text="Utility v28.1", TextColor3=C.textMuted,
+    BackgroundTransparency=1, Text="Utility v28.2", TextColor3=C.textMuted,
     Font=DS.F.subtle, TextSize=10, TextXAlignment=Enum.TextXAlignment.Left, Parent=header })
 
 local miniBtn = new("TextButton", { Size=UDim2.new(0,30,0,30), Position=UDim2.new(1,-78,0.5,-15),
@@ -842,9 +820,7 @@ local langBtn = new("TextButton", {
 })
 corner(langBtn, DS.R.chip)
 stroke(langBtn, C.accent2, 1, 0.5)
-local function updateLangBtn()
-    langBtn.Text = T("lang_switch")
-end
+local function updateLangBtn() langBtn.Text = T("lang_switch") end
 updateLangBtn()
 langBtn.MouseEnter:Connect(function()
     local cur = langBtn.BackgroundColor3
@@ -977,7 +953,6 @@ do
     end))
 end
 
--- ═══ TABS ═══
 local tabContents, activeTab = {}, nil
 local function switchTab(name)
     if activeTab == name then return end
@@ -1100,7 +1075,6 @@ settingsBtn.MouseLeave:Connect(function()
     end
 end)
 
--- ═══ COMPONENTS ═══
 local toggleRegistry, allToggles, allSliders = {}, {}, {}
 local makeSection, createToggle, createSlider, createButton
 do
@@ -1275,7 +1249,6 @@ do
     end
 end
 
--- ═══ ЧИСЛА ═══
 local parseNumber, formatNumber
 do
     local NUMBER_SUFFIXES = {
@@ -1322,7 +1295,6 @@ do
     end
 end
 
--- ═══ MOB LOGIC ═══
 local getMobRoot, getMobDisplayName, getMobHP, hasBossEmoji, isBossMob,
       invalidateMobCache, getAllMobs
 do
@@ -1591,7 +1563,6 @@ do
     end
 end
 
--- ═══ Утилиты ═══
 local function teleportTo(pos)
     local char = LocalPlayer.Character
     if not char then return end
@@ -2477,11 +2448,12 @@ do
 end
 
 -- ═══════════════════════════════════════════════════════════
---   HITBOX
+--   HITBOX ★ (v28.2 — мгновенное снятие хитбокса при смерти)
 -- ═══════════════════════════════════════════════════════════
 makeSection(pageHitbox, "sec_mob_hitbox", "👊")
 do
     local hitboxOriginals, hitboxTaskId = {}, nil
+
     local function findBaseParts(mob)
         local parts = {}
         for _, name in ipairs({"HumanoidRootPart","RootPart","Head","Torso","UpperTorso","LowerTorso","Shell"}) do
@@ -2493,34 +2465,82 @@ do
         end
         return parts
     end
+
+    -- Восстановление одной части
+    local function restorePart(part, orig)
+        if not part or not orig then return end
+        if not part.Parent then return end
+        pcall(function()
+            part.Size = orig.Size
+            part.CanCollide = orig.CanCollide
+            part.Transparency = orig.Transparency
+            part.Massless = orig.Massless
+        end)
+    end
+
+    -- ★ Прямая проверка «моб мёртв» (без кэша — срабатывает мгновенно)
+    local function isMobDead(model)
+        if not model or not model.Parent then return true end
+        if model:GetAttribute("Dead") == true then return true end
+        local hum = model:FindFirstChildOfClass("Humanoid")
+        if hum and hum.Health <= 0 then return true end
+        return false
+    end
+
     local function expandHitbox()
-        for _, data in ipairs(getAllMobs()) do
-            for _, part in ipairs(findBaseParts(data.model)) do
-                if not hitboxOriginals[part] then
-                    hitboxOriginals[part] = {Size=part.Size, CanCollide=part.CanCollide, Transparency=part.Transparency, Massless=part.Massless}
+        -- 1) Список живых мобов
+        local alive = {}
+        for _, data in ipairs(getAllMobs()) do alive[data.model] = true end
+
+        -- 2) Мгновенно восстанавливаем хитбоксы у мёртвых / исчезнувших
+        for part, orig in pairs(hitboxOriginals) do
+            local shouldRestore = false
+            if not part or not part.Parent then
+                shouldRestore = true
+            else
+                local model = part:FindFirstAncestorOfClass("Model")
+                if not model or not alive[model] or isMobDead(model) then
+                    shouldRestore = true
                 end
-                local s = math.max(1, Config.HitboxSize)
-                local targetSize = Vector3.new(s,s,s)
-                if part.Size ~= targetSize then part.Size = targetSize end
-                if part.CanCollide then part.CanCollide = false end
-                if part.Transparency ~= 0.5 then part.Transparency = 0.5 end
-                if not part.Massless then part.Massless = true end
+            end
+            if shouldRestore then
+                restorePart(part, orig)
+                hitboxOriginals[part] = nil
+            end
+        end
+
+        -- 3) Расширяем хитбоксы живых мобов
+        for _, data in ipairs(getAllMobs()) do
+            if not isMobDead(data.model) then
+                for _, part in ipairs(findBaseParts(data.model)) do
+                    if not hitboxOriginals[part] then
+                        hitboxOriginals[part] = {
+                            Size = part.Size,
+                            CanCollide = part.CanCollide,
+                            Transparency = part.Transparency,
+                            Massless = part.Massless,
+                        }
+                    end
+                    local s = math.max(1, Config.HitboxSize)
+                    local targetSize = Vector3.new(s,s,s)
+                    if part.Size ~= targetSize then part.Size = targetSize end
+                    if part.CanCollide then part.CanCollide = false end
+                    if part.Transparency ~= 0.5 then part.Transparency = 0.5 end
+                    if not part.Massless then part.Massless = true end
+                end
             end
         end
     end
+
     local function restoreHitboxes()
         Config.HitboxEnabled = false
         if hitboxTaskId then unscheduleHeartbeat(hitboxTaskId) hitboxTaskId = nil end
         for part, orig in pairs(hitboxOriginals) do
-            if part and part.Parent then
-                pcall(function()
-                    part.Size=orig.Size part.CanCollide=orig.CanCollide
-                    part.Transparency=orig.Transparency part.Massless=orig.Massless
-                end)
-            end
+            restorePart(part, orig)
         end
         hitboxOriginals = {}
     end
+
     local function toggleHitbox(state)
         Config.HitboxEnabled = state
         if state then
@@ -2535,6 +2555,7 @@ do
             showToast(T("toast_hitbox_off"), C.warn, "👊")
         end
     end
+
     createToggle(pageHitbox, "tog_hitbox", false, toggleHitbox, "HitboxEnabled", "desc_hitbox")
     createSlider(pageHitbox, "lbl_hitbox_size", 1, 60, 15, C.gold, function(v)
         Config.HitboxSize = math.max(1, v)
@@ -3492,7 +3513,7 @@ do
 end
 
 -- ═══════════════════════════════════════════════════════════
---   SETTINGS + CONFIGS
+--   SETTINGS
 -- ═══════════════════════════════════════════════════════════
 local applyThemeFull
 local function collectConfigData()
@@ -3615,7 +3636,6 @@ local function refreshAllOpenConfigLists()
     for _, fn in ipairs(openConfigLists) do pcall(fn) end
 end
 
--- FPS Booster
 makeSection(pageSettings, "sec_perf", "⚡")
 do
     local fpsBoosterData = nil
@@ -4106,13 +4126,12 @@ do
         Font=DS.F.bold, TextSize=14,
         TextXAlignment=Enum.TextXAlignment.Left, Parent=aboutCard }), "about_text")
     new("TextLabel", { Size=UDim2.new(1,-80,0,14), Position=UDim2.new(0,64,0,32),
-        BackgroundTransparency=1, Text="Skill Point Legends • Utility v28.1",
+        BackgroundTransparency=1, Text="Skill Point Legends • Utility v28.2",
         TextColor3=C.textMuted,
         Font=DS.F.subtle, TextSize=11,
         TextXAlignment=Enum.TextXAlignment.Left, Parent=aboutCard })
 end
 
--- input dialog
 showInputDialog = function(title, default, placeholder, onSave)
     if isDialogOpen then return end
     isDialogOpen = true
@@ -4367,6 +4386,7 @@ do
 end
 
 print("═══════════════════════════════════════")
-print("[Utility v28.1] Loaded for "..LocalPlayer.Name.." | Lang: "..LANG)
+print("[Utility v28.2] Loaded for "..LocalPlayer.Name.." | Lang: "..LANG)
+print("[Fix] Hitbox removed on mob death instantly")
 print("═══════════════════════════════════════")
 showToast(T("toast_script_loaded"), C.accent, "⚡")
